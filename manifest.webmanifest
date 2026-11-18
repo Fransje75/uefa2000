@@ -1,0 +1,16 @@
+{
+  "name": "UEFA Manager 2000 — web",
+  "short_name": "UEFA Manager",
+  "description": "UEFA Manager 2000 in je browser, met je eigen spelbestanden.",
+  "lang": "nl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F1EA",
+  "theme_color": "#1F4D3A",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
