@@ -1224,7 +1224,7 @@ function viewMenu() {
     <li class="tap" id="m-fin" tabindex="0"><div class="grow"><div>Financiën</div><div class="sub">Banksaldo ${S.dash && S.dash.balance != null ? money(S.dash.balance) : ''} · inkomsten en uitgaven</div></div></li>
   </ul></section>
   <section><h2>Spel</h2><ul class="list">
-    <li class="tap" id="m-save" tabindex="0"><div class="grow"><div>Opslaan</div><div class="sub">Bewaar de huidige stand op dit apparaat</div></div></li>
+    <li class="tap" id="m-save" tabindex="0"><div class="grow"><div>Opslaan</div><div class="sub">Bewaar de huidige stand op dit apparaat; je kiest of je de vorige opslag overschrijft</div></div></li>
     <li class="tap" id="m-load" tabindex="0"><div class="grow"><div>Opgeslagen spel laden</div></div></li>
     <li class="tap" id="m-new" tabindex="0"><div class="grow"><div>Nieuw spel</div><div class="sub">Begin opnieuw op 1 juli 1999</div></div></li>
     ${installItem()}
@@ -1923,13 +1923,36 @@ function playerSheet(p, extra = {}) {
   return el;
 }
 
+// Opslaan: eerst vragen of de vorige opslag van dit spel overschreven wordt of dat er een nieuwe bij komt.
+// S.saveKey = opslag waar het huidige spel vandaan komt of het laatst in is bewaard (null bij een nieuw spel).
+const saveLine = (x) => `${esc(x.meta.club)} · ${fmtDate(x.meta.date)} · opgeslagen ${new Date(x.meta.saved).toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`;
 async function saveGame() {
+  let saves = [];
+  try { saves = ((await dbAll('saves')) || []).sort((a, b) => b.meta.saved - a.meta.saved); } catch (e) { return toast('Opslaan lukt niet in deze browser: opslag is niet beschikbaar.'); }
+  const cur = saves.find((x) => x.key === S.saveKey), others = saves.filter((x) => x !== cur);
+  const el = h(`<div class="sheet" role="dialog" aria-modal="true" aria-label="Opslaan"><div>
+    <h3>Opslaan</h3><p class="note" style="font-size:14px">${esc(S.dash.club.name)} · ${fmtDate(S.dash.date)}</p>
+    ${cur ? `<ul class="list" style="margin-top:12px"><li class="tap" data-sv="${cur.key}" tabindex="0"><div class="grow"><div><b>Vorige opslag overschrijven</b></div><div class="sub">${saveLine(cur)}</div></div></li></ul>` : ''}
+    <ul class="list" style="margin-top:12px"><li class="tap" data-sv="new" tabindex="0"><div class="grow"><div>${cur ? 'Als nieuwe opslag bewaren' : '<b>Als nieuwe opslag bewaren</b>'}</div><div class="sub">De andere opslagen blijven staan</div></div></li></ul>
+    ${others.length ? `<p class="lbl">Of een andere opslag overschrijven</p><ul class="list">${others.map((x) => `<li class="tap" data-sv="${x.key}" tabindex="0"><div class="grow"><div>${esc(x.meta.club)}</div><div class="sub">${saveLine(x).slice(esc(x.meta.club).length + 3)}</div></div></li>`).join('')}</ul>` : ''}
+    <div style="padding:16px 18px 0"><button class="btn alt wide" data-close>Annuleren</button></div></div></div>`).firstChild;
+  el.addEventListener('click', async (e) => {
+    if (e.target === el || e.target.closest('[data-close]')) return el.remove();
+    const li = e.target.closest('[data-sv]'); if (!li) return;
+    const target = li.dataset.sv, over = target !== 'new' ? saves.find((x) => x.key === target) : null;
+    if (over && over !== cur && !li.dataset.armed) { li.dataset.armed = '1'; li.querySelector('.sub').innerHTML = `<b style="color:var(--loss)">Tik nogmaals om deze opslag (${esc(over.meta.club)}, ${fmtDate(over.meta.date)}) te vervangen.</b>`; return; }
+    el.remove(); await doSave(over ? over.key : null);
+  });
+  document.body.append(el); $('[data-sv]', el).focus({ preventScroll: true });
+}
+async function doSave(key) {
   toast('Opslaan…');
   try {
     const r = await rpc('save');
-    const key = 'save-' + Date.now();
-    await dbPut('saves', key, { key, meta: r.meta, data: r.data });
-    toast(`Opgeslagen: ${r.meta.club}, ${fmtDate(r.meta.date)}`);
+    const k = key || 'save-' + Date.now();
+    await dbPut('saves', k, { key: k, meta: r.meta, data: r.data });
+    S.saveKey = k;
+    toast(`${key ? 'Overschreven' : 'Opgeslagen'}: ${r.meta.club}, ${fmtDate(r.meta.date)}`);
   } catch (e) { toast('Opslaan lukt niet in deze browser: opslag is niet beschikbaar.'); }
 }
 
@@ -1985,11 +2008,11 @@ async function showStart() {
   $('#new').onclick = () => newGameFlow();
   if (S.boot && S.boot.jit === false) app.querySelector('.intro').insertAdjacentHTML('beforeend', '<p class="note" style="padding:0;margin-top:14px">Deze browser staat de snelle modus niet toe; het spel draait in de tragere veilige modus.</p>');
   $('#files').onclick = () => showSetup();
-  app.querySelectorAll('[data-del]').forEach((b) => b.onclick = async (e) => { e.stopPropagation(); await dbDel('saves', b.dataset.del); showStart(); });
+  app.querySelectorAll('[data-del]').forEach((b) => b.onclick = async (e) => { e.stopPropagation(); await dbDel('saves', b.dataset.del); if (S.saveKey === b.dataset.del) S.saveKey = null; showStart(); });
   app.querySelectorAll('[data-load]').forEach((li) => li.onclick = async () => {
     const s = saves.find((x) => x.key === li.dataset.load);
     waiting('Laden…', `${s.meta.club}, ${fmtDate(s.meta.date)}`);
-    try { const copy = new Uint8Array(s.data); const r = await rpc('load', { data: copy }, null, [copy.buffer]); S.dash = r.dash; S.tab = 'home'; S.squad = S.fixtures = null; S.lineup = S.sel = S.mails = S.news = S.tr = S.fin = S.staff = S.sp = S.trn = S.stad = S.bank = S.yo = S.shop = S.ins = S.ctable = S.cfix = S.pstats = S.comps = null; S.cs = null; S.rec = S.th = S.recClubs = S.recv = S.mgrs = S.refs = S.eos = S.eosC = S.recPast = null; renderGame(); if (r.oldSave) toast('Deze opslag is van vóór de rekencorrectie van 17-11-2026: startkapitaal, spelerswaarden en stafsalarissen kwamen verkeerd uit. Begin voor een eerlijk spel een nieuw spel.', 9000); }
+    try { const copy = new Uint8Array(s.data); const r = await rpc('load', { data: copy }, null, [copy.buffer]); S.saveKey = s.key; S.dash = r.dash; S.tab = 'home'; S.squad = S.fixtures = null; S.lineup = S.sel = S.mails = S.news = S.tr = S.fin = S.staff = S.sp = S.trn = S.stad = S.bank = S.yo = S.shop = S.ins = S.ctable = S.cfix = S.pstats = S.comps = null; S.cs = null; S.rec = S.th = S.recClubs = S.recv = S.mgrs = S.refs = S.eos = S.eosC = S.recPast = null; renderGame(); if (r.oldSave) toast('Deze opslag is van vóór de rekencorrectie van 17-11-2026: startkapitaal, spelerswaarden en stafsalarissen kwamen verkeerd uit. Begin voor een eerlijk spel een nieuw spel.', 9000); }
     catch (err) { failed('Laden lukte niet', err, () => showStart()); }
   });
 }
@@ -2017,7 +2040,7 @@ function pickClub(tree) {
     app.querySelectorAll('[data-d]').forEach((b) => b.onclick = () => { di = +b.dataset.d; draw(); });
     app.querySelectorAll('[data-club]').forEach((li) => li.onclick = async () => {
       waiting(li.textContent, 'Je contract wordt getekend en het seizoensschema gemaakt.');
-      try { const r = await rpc('pickClub', { club: +li.dataset.club }); S.dash = r.dash; S.tab = 'home'; S.squad = S.fixtures = null; S.lineup = S.sel = S.mails = S.news = S.tr = S.fin = S.staff = S.sp = S.trn = S.stad = S.bank = S.yo = S.shop = S.ins = S.ctable = S.cfix = S.pstats = S.comps = null; S.cs = null; S.rec = S.th = S.recClubs = S.recv = S.mgrs = S.refs = S.eos = S.eosC = S.recPast = null; renderGame(); }
+      try { const r = await rpc('pickClub', { club: +li.dataset.club }); S.saveKey = null; S.dash = r.dash; S.tab = 'home'; S.squad = S.fixtures = null; S.lineup = S.sel = S.mails = S.news = S.tr = S.fin = S.staff = S.sp = S.trn = S.stad = S.bank = S.yo = S.shop = S.ins = S.ctable = S.cfix = S.pstats = S.comps = null; S.cs = null; S.rec = S.th = S.recClubs = S.recv = S.mgrs = S.refs = S.eos = S.eosC = S.recPast = null; renderGame(); }
       catch (err) { failed('De club kiezen lukte niet', err, () => newGameFlow()); }
     });
   };
