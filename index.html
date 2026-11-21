@@ -409,13 +409,13 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .gr.go svg:last-child{width:1.4em;height:1.4em}
 .gf.busy .gr.go{animation:gbusy 1s ease-in-out infinite}
 @keyframes gbusy{50%{filter:brightness(1.35)}}
-.gf-top{grid-column:2;display:flex;align-items:stretch;gap:.6em;padding:.6vh .8em;background:linear-gradient(180deg,#2e7a57,#1f5a40);color:#fff;border-bottom:2px solid #123a2a;min-width:0}
-.gb-bank{display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:8.5em}
-.gb-amt{font:600 1em/1.1 var(--display);background:rgba(0,0,0,.28);border-radius:.35em;padding:.25em .5em;text-align:right;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
-.gb-prog{position:relative;height:1.15em;background:rgba(0,0,0,.28);border-radius:.35em;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.gf-top{grid-column:2;display:flex;align-items:stretch;gap:.6em;height:clamp(50px,10vh,76px);box-sizing:border-box;padding:.8vh .8em;background:linear-gradient(180deg,#2e7a57,#1f5a40);color:#fff;border-bottom:2px solid #123a2a;min-width:0}
+.gb-bank{display:flex;flex-direction:column;gap:4px;min-width:8.5em}
+.gb-amt{flex:1;display:flex;align-items:center;justify-content:flex-end;font:600 1em/1 var(--display);background:rgba(0,0,0,.28);border-radius:.35em;padding:0 .5em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.gb-prog{position:relative;flex:1;background:rgba(0,0,0,.28);border-radius:.35em;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
 .gb-prog i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--amber),#ffd772);transition:width .2s}
-.gb-prog span{position:relative;font-size:.72em;line-height:1.6em;padding-left:.4em;color:#2B1D00;font-weight:700}
-.gm{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:.5em;background:rgba(0,0,0,.2);border-radius:.45em;padding:.2em .6em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.gb-prog span{position:relative;display:flex;align-items:center;height:100%;font-size:.72em;padding-left:.4em;color:#2B1D00;font-weight:700}
+.gm{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:.5em;background:rgba(0,0,0,.28);border-radius:.45em;padding:.2em .6em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
 .gm-side{flex:1;min-width:0;display:flex;align-items:center;gap:.4em;justify-content:flex-end}
 .gm-side:last-child{flex-direction:row-reverse;justify-content:flex-end}
 .gm-txt{min-width:0;display:grid;line-height:1.15;text-align:right}
@@ -424,38 +424,39 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .gm-txt span{font-size:.78em;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gm-side.own b{color:var(--amber)}
 .gm .shirt{width:2.1em;height:2.1em}
-.gm-mid{display:grid;justify-items:center;gap:1px;padding:0 .4em;border-left:1px solid rgba(255,255,255,.18);border-right:1px solid rgba(255,255,255,.18)}
+.gm-mid{align-self:stretch;display:grid;align-content:center;justify-items:center;gap:1px;padding:0 .6em;border-left:1px solid rgba(255,255,255,.18);border-right:1px solid rgba(255,255,255,.18)}
 .gm-ico{width:1.3em;height:1.3em}
 .gm-mid span{font-size:.78em}
 .gm-none{opacity:.7;font-size:.85em}
-.gd{display:flex;align-items:center;gap:.4em}
-.gw{display:flex;align-items:center;gap:2px;background:rgba(0,0,0,.25);border-radius:.35em;padding:.15em .3em}
+.gd{display:flex;align-items:stretch;gap:.6em}
+.gw{display:flex;align-items:center;gap:2px;background:rgba(0,0,0,.28);border-radius:.35em;padding:0 .4em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
 .gw-t{width:.7em;height:1.5em}.gw-k,.gw-w{width:1.5em;height:1.5em}
-.gd-date{font:600 1em/1 var(--display);background:#0F2E22;color:var(--amber);border-radius:.35em;padding:.4em .55em;letter-spacing:.04em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
-.gf-main{grid-column:2;min-width:0;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:0}
-.gf .gf-main main,.gf-old{padding:4px 0 2.5em;max-width:760px;margin:0 auto}
+.gd-date{display:flex;align-items:center;font:600 1.05em/1 var(--display);background:#0F2E22;color:var(--amber);border-radius:.35em;padding:0 .6em;letter-spacing:.04em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.gf-main{grid-column:2;min-width:0;min-height:0;max-width:none !important;margin:0 !important;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:0}
+.gf-old{padding:4px 0 2.5em;max-width:760px;margin:0 auto}
 .gsheet .gs-btns{display:flex;gap:.6em;justify-content:flex-end;margin:14px 18px 4px}
 .gsheet form.ig{display:grid;grid-template-columns:auto 1fr;gap:.45em .8em;align-items:center;margin:10px 18px}
 .gsheet form.ig select{font:inherit;padding:.4em;border-radius:.45em;border:1.5px solid var(--line)}
 /* Football Today */
-.ft{display:grid;grid-template-columns:1fr 1fr;gap:1.2vh;padding:1.2vh}
+.ft{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1.2fr) minmax(0,1fr);gap:1.4vh;padding:1.4vh;height:100%;min-height:330px;box-sizing:border-box}
 .ft .card{background:#fff;border:1px solid var(--line);border-radius:.6em;min-width:0}
 .ft h3{margin:0;padding:.45em .7em;font:600 .82em/1 var(--body);text-transform:uppercase;letter-spacing:.07em;color:#fff;background:var(--turf);border-radius:.55em .55em 0 0}
-.fc{padding:0 0 .4em}
+.fc{padding:0 0 .5em;display:flex;flex-direction:column;min-height:0}
 .fc-hd{display:flex;align-items:center;gap:.4em;padding:.35em .4em;background:var(--turf);color:#fff;border-radius:.55em .55em 0 0}
 .fc-hd b{flex:1;text-align:center;font:600 1em var(--display)}
 .fc-nav{border:0;background:rgba(255,255,255,.15);color:#fff;border-radius:.35em;width:2em;height:1.8em;display:grid;place-items:center;cursor:pointer}
 .fc-nav svg{width:1.1em;height:1.1em}.fc-nav[aria-disabled=true]{opacity:.35;cursor:default}
-.fc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:.35em .4em 0}
+.fc-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:auto repeat(6,minmax(0,1fr));gap:3px;padding:.4em .5em 0}
 .fc-w{font-size:.72em;text-align:center;color:var(--muted);font-weight:600;padding:.2em 0;background:#EEF2EC;border-radius:.25em}
-.fc-d{border:0;background:#F4F7F2;border-radius:.3em;min-height:max(1.75em,26px);font:500 .92em var(--body);color:var(--ink);cursor:pointer;padding:0}
+.fc-d{border:0;background:#F4F7F2;border-radius:.3em;min-height:0;font:500 1em var(--body);color:var(--ink);cursor:pointer;padding:0}
 .fc-d.off{background:none;cursor:default}
 .fc-d.has{color:#0E8A3E;font-weight:800;background:#E3F5E8}
 .fc-d.today{box-shadow:inset 0 0 0 2px var(--amber);background:#11335A;color:#fff}
 .fc-d[aria-pressed=true]:not(.today){background:var(--turf);color:#fff}
 .fc-d:hover:not(.off){filter:brightness(.95)}
-.ft-r{display:flex;flex-direction:column;gap:1.2vh;min-width:0}
-.fs-l,.fm-l{list-style:none;margin:0;padding:.2em 0;max-height:9.6em;overflow-y:auto}
+.ft-r{display:grid;grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:1.4vh;min-width:0;min-height:0}
+.fs,.fm{display:flex;flex-direction:column;min-height:0}
+.fs-l,.fm-l{flex:1;min-height:0;list-style:none;margin:0;padding:.2em 0;overflow-y:auto}
 .fs-r{width:100%;display:flex;align-items:center;gap:.5em;border:0;background:none;text-align:left;padding:.22em .6em;font:inherit;font-size:.9em;cursor:default;color:var(--ink)}
 .fs-r svg{width:1.5em;height:1em;flex:none}
 .fs-r.tap{cursor:pointer}.fs-r.tap:hover{background:#F2F5F0}
@@ -465,14 +466,17 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .fm-hd span:not(:first-child),.fm-r span:not(:first-child){text-align:right}
 .fm-r{width:100%;border:0;background:none;font:inherit;font-size:.9em;text-align:left;cursor:pointer;color:var(--ink)}
 .fm-r:hover{background:#F2F5F0}
-.fg{padding:.5em .5em .45em;display:flex;flex-direction:column;gap:.4em}
-.gsvg{position:relative;width:100%;aspect-ratio:2.7/1;background:repeating-linear-gradient(0deg,transparent 0 11px,rgba(80,110,160,.08) 11px 12px),repeating-linear-gradient(90deg,transparent 0 11px,rgba(80,110,160,.08) 11px 12px),#F3F5F8;border-radius:.4em}
-.gsvg svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.gsvg.nodata span{position:absolute;inset:0;display:grid;place-items:center;color:#444;font-size:1.05em}
-.gbox{fill:none;stroke:#556;stroke-width:.8;vector-effect:non-scaling-stroke}
-.gx,.gy{font-size:8px;fill:#334}.gy{text-anchor:end}.gx{text-anchor:middle}
+.fg{padding:.5em .5em .45em;display:flex;flex-direction:column;gap:.5em;min-height:0}
+.fg-wrap{display:flex;flex-direction:column;gap:.6vh;min-height:0}.fg-wrap .fg{flex:1}
+.ft-mf{display:flex;justify-content:flex-end}
+.gsvg{position:relative;flex:1;min-height:0;width:100%;overflow:hidden;background:repeating-linear-gradient(0deg,transparent 0 11px,rgba(80,110,160,.08) 11px 12px),repeating-linear-gradient(90deg,transparent 0 11px,rgba(80,110,160,.08) 11px 12px),#F3F5F8;border-radius:.4em}
+.gsvg svg{position:absolute;inset:0;display:block}
+.gsvg .nod{position:absolute;inset:0;display:grid;place-items:center;color:#444;font-size:1.05em}
+.gbox{fill:none;stroke:#556;stroke-width:1}
+.ggrid{stroke:rgba(60,80,120,.18);stroke-width:1}
+.gx,.gy{fill:#2A3340;font-family:var(--body)}.gy{text-anchor:end}.gy.r{text-anchor:start}.gx{text-anchor:middle}.gy.cp{fill:#C0312A}.gy.ct{fill:#2F5BD6}
 .g0{stroke:#999;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
-.gsvg polyline{fill:none;stroke-width:2;vector-effect:non-scaling-stroke}
+.gsvg polyline{fill:none;stroke-width:2.2}
 .gsvg .pt{stroke:none}
 .lp{stroke:#E0443A}.lp.pt{fill:#E0443A}.lt{stroke:#2F5BD6}.lt.pt{fill:#2F5BD6}
 .lb{stroke:#2F5BD6}.lb.pt{fill:#2F5BD6}.lo{stroke:#F08A3C}.lo.pt{fill:#F08A3C}
@@ -486,17 +490,17 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
   .gf-logo{display:none}
   .gn-grid{grid-template-columns:repeat(10,1fr);gap:2px;padding:2px}
   .gn{aspect-ratio:auto;height:20px}
-  .gf-top{padding:3px .6em;gap:.4em}
-  .gb-bank{flex-direction:row;align-items:center;min-width:0}
+  .gf-top{height:36px;padding:3px .6em;gap:.4em}
+  .gb-bank{flex-direction:row;align-items:stretch;min-width:0}
   .gb-prog{width:3.5em}
   .gm{padding:1px .5em}.gm .shirt{width:1.6em;height:1.6em}.gm-txt span{display:none}
-  .gm-mid{display:flex;gap:.3em}
+  .gm-mid{display:flex;align-items:center;gap:.3em}
+  .ft{gap:6px;padding:6px}.ft-r{gap:6px}.fg{gap:4px;padding:4px}.fgb{min-height:24px;padding:.25em .7em}.ft h3{padding:.35em .6em}.fc-hd{padding:.2em .4em}.fc-nav{height:1.5em}
   .gd-date{padding:.25em .45em}
-  .fs-l,.fm-l{max-height:9em}
   .gr-row .gr,.gb-row .gb{height:26px}
   .gt-node{min-height:26px;padding:.3em .5em}
 }
-@media (max-width:760px){ .ft{grid-template-columns:1fr} }
+@media (max-width:640px){ .ft{grid-template-columns:1fr;grid-template-rows:none;height:auto} }
 </style>
 </head>
 <body>
@@ -2473,7 +2477,7 @@ function gframe(body) {
       <nav class="gt" aria-label="UEFA Manager Today">${tree}</nav>
       <div class="gb-row">${blue('g-new', 'newg', 'Start New Game')}${blue('g-save', 'save', 'Save Game')}${blue('g-comp', 'comp', 'Compare Players (not in the web version yet)', false)}${blue('g-set', 'sett', 'Game Settings')}${blue('g-help', 'help', 'Help')}</div>
       <div class="gr-row">${red('g-exit', 'exit', 'Exit Game')}${red('g-back', 'back', 'Move back to previous screen', S.hpos > 0)}${red('g-fwd', 'fwd', 'Move forward to next screen', S.hpos < (S.hist || []).length - 1)}</div>
-      <div class="gr-row">${red('g-home', 'home', 'Football Manager Today!')}<button class="gr go" id="go" title="${CTIP[cm]}" aria-label="${CTIP[cm]}" ${S.busy ? 'aria-disabled="true"' : ''}>${GI(BICON.fwd, 'class="arr"')}${GI(CICON[cm])}</button></div>
+      <div class="gr-row"><button class="gr go" id="go" title="${CTIP[cm]}" aria-label="${CTIP[cm]}" ${S.busy ? 'aria-disabled="true"' : ''}>${GI(BICON.fwd, 'class="arr"')}${GI(CICON[cm])}</button></div>
     </aside>
     <header class="gf-top">
       <div class="gb-bank"><div class="gb-amt num">${esc(F.bank || '')}</div><div class="gb-prog">${S.busy ? `<i style="width:${S.busyPct || 4}%"></i><span>${esc(S.busyText || '')}</span>` : ''}</div></div>
@@ -2508,27 +2512,43 @@ function viewToday() {
       <section class="fs card"><h3>Schedule</h3><ul class="fs-l">${sched || '<li class="fs-none">Nothing planned.</li>'}</ul></section>
       <section class="fm card"><h3>Mail Messages</h3><div class="fm-hd"><span>From</span><span>Total</span><span>UnRead</span></div><ul class="fm-l">${mail}</ul></section>
     </div>
-    <section class="fg card">${posGraphSVG(D.pos, g)}<div class="fg-b"><button class="fgb red" data-gs="pos" aria-pressed="${g.pos}">Position</button><button class="fgb blue" data-gs="pts" aria-pressed="${g.pts}">Points</button></div></section>
-    <section class="fg card">${finGraphSVG(D.fin, g)}<div class="fg-b"><button class="fgb blue" data-gs="bal" aria-pressed="${g.bal}">Balance</button><button class="fgb orange" data-gs="proj" aria-pressed="${g.proj}">Projected Balance</button><span class="sp"></span><button class="fgb red" aria-disabled="true" title="Not in the web version yet">Manager Factfile</button></div></section>
+    <section class="fg card"><div class="gsvg" id="g-pos"></div><div class="fg-b"><button class="fgb red" data-gs="pos" aria-pressed="${g.pos}">Position</button><button class="fgb blue" data-gs="pts" aria-pressed="${g.pts}">Points</button></div></section>
+    <div class="fg-wrap"><section class="fg card"><div class="gsvg" id="g-fin"></div><div class="fg-b"><button class="fgb blue" data-gs="bal" aria-pressed="${g.bal}">Balance</button><button class="fgb orange" data-gs="proj" aria-pressed="${g.proj}">Projected Balance</button></div></section>
+      <div class="ft-mf"><button class="fgb red" aria-disabled="true" title="Not in the web version yet">Manager Factfile</button></div></div>
   </div>`;
 }
-const GW = 300, GH = 150, GL = 34, GR = 10, GT = 10, GB = 22;
-function gAxis(labels, n) { return labels.map(([i, t]) => `<text x="${GL + (GW - GL - GR) * i / Math.max(1, n - 1)}" y="${GH - 6}" class="gx">${esc(t)}</text>`).join(''); }
-function gLine(vals, x, y, cls) { if (!vals.length) return ''; const p = vals.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' '); return `<polyline class="${cls}" points="${p}"/>${vals.map((v, i) => `<rect class="${cls} pt" x="${(x(i) - 2).toFixed(1)}" y="${(y(v) - 2).toFixed(1)}" width="4" height="4"/>`).join('')}`; }
-function gFrame(inner) { return `<svg class="gsvg" viewBox="0 0 ${GW} ${GH}" preserveAspectRatio="none" role="img"><rect x="${GL}" y="${GT}" width="${GW - GL - GR}" height="${GH - GT - GB}" class="gbox"/>${inner}</svg>`; }
-function posGraphSVG(P, g) {
-  if (!P || !P.pos.length) return `<div class="gsvg nodata">${gFrame('')}<span>No Data Available</span></div>`;
-  const n = Math.max(2, P.rounds), x = (i) => GL + (GW - GL - GR) * i / (n - 1), ih = GH - GT - GB;
-  const yPos = (v) => GT + ih * (v - 1) / Math.max(1, P.clubs - 1), maxP = Math.max(3, P.maxPts, ...P.pts), yPts = (v) => GT + ih * (1 - v / maxP);
-  return `<div class="gsvg">${gFrame(`${gAxis(P.labels, n)}<text x="${GL - 4}" y="${GT + 8}" class="gy">${g.pts && !g.pos ? maxP : 1}</text><text x="${GL - 4}" y="${GH - GB}" class="gy">${g.pts && !g.pos ? 0 : P.clubs}</text>${g.pos ? gLine(P.pos, x, yPos, 'lp') : ''}${g.pts ? gLine(P.pts, x, yPts, 'lt') : ''}`)}</div>`;
+// graphs are drawn at the real pixel size of their box (readable scale labels), again after every render and on resize
+function gTicks(lo, hi, n) { const span = Math.max(1e-9, hi - lo), raw = span / n, mag = 10 ** Math.floor(Math.log10(raw)), step = [1, 2, 2.5, 5, 10].map((k) => k * mag).find((k) => k >= raw) || 10 * mag;
+  const out = []; for (let v = Math.ceil(lo / step) * step; v <= hi + step * 1e-6; v += step) out.push(Math.round(v / step) * step); return out; }
+function gSvg(box, W, H, spec) {
+  const fs = Math.max(10, Math.min(14, H / 16)), L = spec.left ? fs * 3.4 : fs, R = spec.right ? fs * 2.6 : fs * .8, T = fs * .9, B = fs * 1.9;
+  const iw = W - L - R, ih = H - T - B, X = (i, n) => L + iw * i / Math.max(1, n - 1);
+  let o = `<rect x="${L}" y="${T}" width="${iw}" height="${ih}" class="gbox"/>`;
+  const axis = (ax, side) => { if (!ax) return; const y = (v) => T + ih * (ax.inv ? (v - ax.lo) / (ax.hi - ax.lo || 1) : 1 - (v - ax.lo) / (ax.hi - ax.lo || 1));
+    for (const v of ax.ticks) { const yy = y(v); o += `<line x1="${L}" x2="${L + iw}" y1="${yy}" y2="${yy}" class="ggrid"/><text x="${side ? L + iw + fs * .4 : L - fs * .4}" y="${yy + fs * .35}" class="gy ${side ? 'r' : ''} ${ax.cls}" font-size="${fs}">${esc(ax.fmt ? ax.fmt(v) : v)}</text>`; }
+    return y; };
+  const yl = axis(spec.left, 0), yr = axis(spec.right, 1);
+  for (const [i, t] of spec.labels) o += `<text x="${X(i, spec.n)}" y="${H - fs * .55}" class="gx" font-size="${fs}">${esc(t)}</text>`;
+  for (const [vals, side, cls] of spec.lines) { const y = side ? yr : yl; if (!y || !vals.length) continue; const pt = (v, i) => `${X(i, spec.n).toFixed(1)},${y(v).toFixed(1)}`;
+    o += `<polyline class="${cls}" points="${vals.map(pt).join(' ')}"/>` + vals.map((v, i) => `<rect class="${cls} pt" x="${(X(i, spec.n) - 2.5).toFixed(1)}" y="${(y(v) - 2.5).toFixed(1)}" width="5" height="5"/>`).join(''); }
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(spec.title)}">${o}</svg>${spec.empty ? `<span class="nod">No Data Available</span>` : ''}`;
 }
-function finGraphSVG(Fg, g) {
-  if (!Fg) return '';
-  const all = [...Fg.hist, ...(g.proj ? Fg.proj : [])], mx = Math.max(...all, 0), mn = Math.min(...all, 0), span = Math.max(1, mx - mn);
-  const x = (i) => GL + (GW - GL - GR) * i / 11, ih = GH - GT - GB, y = (v) => GT + ih * (1 - (v - mn) / span);
-  const proj = [...Fg.hist, ...Fg.proj].slice(0, 12), hist = Fg.hist.slice(0, 12);
-  return `<div class="gsvg">${gFrame(`${gAxis(Fg.labels.map((t, i) => [i, t]), 12)}<text x="${GL - 4}" y="${GT + 8}" class="gy">${compactMoney(mx)}</text><text x="${GL - 4}" y="${GH - GB}" class="gy">${compactMoney(mn)}</text>${mn < 0 ? `<line x1="${GL}" x2="${GW - GR}" y1="${y(0)}" y2="${y(0)}" class="g0"/>` : ''}${g.proj ? gLine(proj, x, y, 'lo') : ''}${g.bal ? gLine(hist, x, y, 'lb') : ''}`)}</div>`;
+function drawGraphs() {
+  const T = S.ft; if (!T || !T.data) return; const g = T.show;
+  const pb = $('#g-pos'), fb = $('#g-fin');
+  if (pb && pb.clientWidth) { const P = T.data.pos, has = P && P.pos.length, n = Math.max(2, (P && P.rounds) || 38);
+    const maxP = has ? Math.max(3, P.maxPts, ...P.pts) : 3, clubs = (P && P.clubs) || 20;
+    gSvg(pb, pb.clientWidth, pb.clientHeight, { title: 'Position and points', n, empty: !has, labels: has ? P.labels : [],
+      left: has && g.pos ? { lo: 1, hi: clubs, inv: true, ticks: [1, ...gTicks(1, clubs, 4).filter((v) => v > 1)], cls: 'cp' } : has && g.pts ? null : { lo: 0, hi: 1, ticks: [] },
+      right: has && g.pts ? { lo: 0, hi: maxP, ticks: gTicks(0, maxP, 4), cls: 'ct' } : null,
+      lines: has ? [[g.pos ? P.pos : [], 0, 'lp'], [g.pts ? P.pts : [], 1, 'lt']] : [] }); }
+  if (fb && fb.clientWidth) { const F = T.data.fin; if (!F) return;
+    const proj = [...F.hist, ...F.proj].slice(0, 12), all = [...F.hist, ...(g.proj ? proj : [])], mx = Math.max(...all, 0), mn = Math.min(...all, 0), t = gTicks(mn, mx, 4);
+    gSvg(fb, fb.clientWidth, fb.clientHeight, { title: 'Balance and projected balance', n: 12, labels: F.labels.map((x, i) => [i, x]),
+      left: { lo: Math.min(mn, t[0]), hi: Math.max(mx, t[t.length - 1]), ticks: t, fmt: compactMoney },
+      lines: [[g.proj ? proj : [], 0, 'lo'], [g.bal ? F.hist.slice(0, 12) : [], 0, 'lb']] }); }
 }
+addEventListener('resize', () => { clearTimeout(S.grT); S.grT = setTimeout(drawGraphs, 80); });
 async function loadToday(open) {
   if (S.ftLoading) return; S.ftLoading = true;
   try { const T = S.ft || (S.ft = { show: { pos: true, pts: true, bal: true, proj: true } });
@@ -2609,6 +2629,7 @@ function renderGame() {
   const m = $('#gfm'), keep = m && S.lastScr === S.scr ? m.scrollTop : 0;
   app.innerHTML = gframe(body); S.lastScr = S.scr;
   if (keep) $('#gfm').scrollTop = keep;
+  if (S.tab === 'today') drawGraphs();
   if (S.tab === 'today' && (!S.ft || !S.ft.data) && !S.ftLoading) loadToday(!S.ftOpened && (S.ftOpened = true));
   else if (!S.fr && !S.frLoading) { S.frLoading = true; rpc('screen', { key: S.scr }).then((r) => { S.fr = r.frame; S.frLoading = false; renderGame(); }).catch(() => { S.frLoading = false; }); }
 }
