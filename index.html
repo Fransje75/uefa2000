@@ -2513,8 +2513,7 @@ function viewToday() {
       <section class="fm card"><h3>Mail Messages</h3><div class="fm-hd"><span>From</span><span>Total</span><span>UnRead</span></div><ul class="fm-l">${mail}</ul></section>
     </div>
     <section class="fg card"><div class="gsvg" id="g-pos"></div><div class="fg-b"><button class="fgb red" data-gs="pos" aria-pressed="${g.pos}">Position</button><button class="fgb blue" data-gs="pts" aria-pressed="${g.pts}">Points</button></div></section>
-    <div class="fg-wrap"><section class="fg card"><div class="gsvg" id="g-fin"></div><div class="fg-b"><button class="fgb blue" data-gs="bal" aria-pressed="${g.bal}">Balance</button><button class="fgb orange" data-gs="proj" aria-pressed="${g.proj}">Projected Balance</button></div></section>
-      <div class="ft-mf"><button class="fgb red" aria-disabled="true" title="Not in the web version yet">Manager Factfile</button></div></div>
+    <section class="fg card"><div class="gsvg" id="g-fin"></div><div class="fg-b"><button class="fgb blue" data-gs="bal" aria-pressed="${g.bal}">Balance</button><button class="fgb orange" data-gs="proj" aria-pressed="${g.proj}">Projected Balance</button><span class="sp"></span><button class="fgb red" aria-disabled="true" title="Not in the web version yet">Manager Factfile</button></div></section>
   </div>`;
 }
 // graphs are drawn at the real pixel size of their box (readable scale labels), again after every render and on resize
