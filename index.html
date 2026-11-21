@@ -293,13 +293,13 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .st-row{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1.15fr) minmax(0,1.1fr) minmax(6.5em,.8fr);align-items:center;gap:.6em;width:100%;padding:.25em .8em;min-height:max(2.5em,40px);border:0;border-top:1px solid var(--line);background:none;font:inherit;color:var(--ink);text-align:left;cursor:pointer}
 .st-row>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .st-row .r{text-align:right;font-variant-numeric:tabular-nums}
-.st-head{font-weight:600;font-size:.8em;color:var(--muted);min-height:0;padding:.5em .8em;border-top:0;background:#F2F5F0;cursor:default}
-.st-head .r{text-align:right}
+.st-head{position:sticky;top:0;z-index:1;min-height:0;padding-top:.45em;padding-bottom:.45em;border-top:0;background:#F2F5F0;cursor:default}
+.st-head>span{font-weight:600;font-size:.8em;color:var(--muted)}
 .st-c{display:flex;align-items:center;gap:.55em}
 .st-c b{font:600 1em var(--display);overflow:hidden;text-overflow:ellipsis}
 .st-m{display:flex;align-items:center;gap:.5em;padding-right:1.6em}
 .st-m>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.st-body .st-row:first-child{border-top:0}
+.st-body .st-head+.st-row{border-top:0}
 .st-hint{margin:0;font-size:.85em}
 .st-row:not(.st-head):hover{background:#F2F5F0}
 .st-row[aria-selected=true]{background:var(--turf);color:#fff}
@@ -2425,8 +2425,7 @@ function pickClub(data) {
         <div class="st-pick"><label id="st-cl">Country</label>${comboHTML('st-co', 'st-cl', countries, ci)}</div>
         <div class="st-pick"><label id="st-dl">Division</label>${comboHTML('st-dv', 'st-dl', divisions, di)}</div></div>
       <div class="st-table" role="listbox" aria-label="${esc(data.title)}">
-        <div class="st-row st-head" aria-hidden="true"><span>Club</span><span>Manager</span><span>Objective</span><span class="r">Bank</span></div>
-        <div class="st-body">${dv.clubs.map((cl) => `<button type="button" class="st-row" role="option" data-club="${cl.id}" aria-selected="${cl.id === sel}" ${cl.taken ? 'aria-disabled="true"' : ''}>
+        <div class="st-body"><div class="st-row st-head" aria-hidden="true"><span>Club</span><span>Manager</span><span>Objective</span><span>Bank</span></div>${dv.clubs.map((cl) => `<button type="button" class="st-row" role="option" data-club="${cl.id}" aria-selected="${cl.id === sel}" ${cl.taken ? 'aria-disabled="true"' : ''}>
           <span class="st-c">${shirtHTML(cl.shirt)}<b>${esc(cl.name)}</b></span><span class="st-m"><span>${esc(cl.mgr)}</span>${flagHTML(cl.mgrNat)}</span><span>${esc(cl.obj)}</span><span class="r">${esc(cl.bank)}</span></button>`).join('')}</div>
       </div>${SHIRTS.bm && FLAGS.url ? '' : '<p class="fr-note st-hint">Shirts and flags come from the folder GFx of your game. Choose your game files again (folder button) and include GFx to see them.</p>'}</div>`, { info: `<span class="k">Manager</span><b>${esc(data.manager)}</b><span>Choose a club, then Continue</span>`, go: sel ? go : null });
     if (prev) $('.st-body').scrollTop = prev;
