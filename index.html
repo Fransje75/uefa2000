@@ -335,7 +335,9 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .ci-pos.p0{background-color:#46C23C}.ci-pos.p1{background-color:#F8CB1D}.ci-pos.p2{background-color:#2F6FD6}.ci-pos.p3{background-color:#F0565F}
 .ci-role{width:36px;height:18px;image-rendering:pixelated;display:block}
 .ci-rolet{font-size:.7em;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ci-ec{width:15px;height:18px;image-rendering:pixelated}
+.ci-ec{flex:none;width:15px;height:18px;background-size:240px 18px;background-repeat:no-repeat;image-rendering:pixelated;animation:ciec 1.6s steps(16) infinite}
+@keyframes ciec{to{background-position:-240px 0}}
+@media (prefers-reduced-motion:reduce){.ci-ec{animation:none}}
 .ci-ect{font-size:.65em;font-weight:700;color:#B5403A}
 @media (max-height:500px){.ci-hd{padding:.3em .5em}.ci-body{padding:.5em .7em .7em}.ci-body h3{margin:.6em 0 .25em}.ci-kits{margin-top:.5em}}
 @media (max-width:640px){.ci-pr{grid-template-columns:minmax(0,1fr) 2.2em 3.2em 2.4em 2.6em 6.2em}}
@@ -513,6 +515,21 @@ function gfxCell(name, idx, w, h, perRow) {
   if (bm === undefined) { try { bm = readBmp(gfxFile(GFX.files, name)); } catch (e) { bm = null; } GFX.bm.set(name, bm); }
   let url = null;
   if (bm) { const per = perRow || Math.floor(bm.w / w), x = (idx % per) * w, y = Math.floor(idx / per) * h; if (x + w <= bm.w && y + h <= bm.h) url = bmpUrl(bm, x, y, w, h); }
+  GFX.url.set(key, url); return url;
+}
+// all n cells of an animation as one horizontal strip (for a CSS steps() animation)
+function gfxStrip(name, n, w, h, perRow) {
+  const key = name + ':strip'; if (GFX.url.has(key)) return GFX.url.get(key);
+  let url = null;
+  try {
+    const cells = []; for (let i = 0; i < n; i++) { const u = gfxCell(name, i, w, h, perRow); if (!u) throw 0; cells.push(u); }
+    const bm = GFX.bm.get(name), cv = document.createElement('canvas'); cv.width = w * n; cv.height = h;
+    const cx = cv.getContext('2d'), img = cx.createImageData(w * n, h);
+    for (let i = 0; i < n; i++) { const x0 = (i % perRow) * w, y0 = Math.floor(i / perRow) * h;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const s = 3 * ((y0 + y) * bm.w + x0 + x), d = 4 * (y * w * n + i * w + x), r = bm.px[s], g = bm.px[s + 1], b = bm.px[s + 2];
+        if (r === 255 && g === 0 && b === 255) continue; img.data[d] = r; img.data[d + 1] = g; img.data[d + 2] = b; img.data[d + 3] = 255; } }
+    cx.putImageData(img, 0, 0); url = cv.toDataURL('image/png');
+  } catch (e) { url = null; }
   GFX.url.set(key, url); return url;
 }
 function loadFlags(files) {
@@ -2416,7 +2433,7 @@ async function clubInfo(list, idx, onMove) {
   back.addEventListener('click', (e) => { if (e.target === back) close(); });
   const players = (title, rows, lb) => `<section class="ci-sec"><h3>${esc(title)}</h3>
     <div class="ci-tab" role="table"><div class="ci-pr ci-ph" role="row"><span>Name</span><span>Pos</span><span>Role</span><span class="r">Age</span><span class="r">Rtg</span><span class="r">Value</span></div>
-    ${rows.map((p) => `<div class="ci-pr" role="row"><span class="ci-pn"><span>${esc(p.name)}</span>${p.nonEC ? (gfxCell('icnEC.bmp', 0, 10, 12, 4) ? `<img class="ci-ec" src="${gfxCell('icnEC.bmp', 0, 10, 12, 4)}" alt="Non EC Player" title="Non EC Player">` : '<span class="ci-ect" title="Non EC Player">EC</span>') : ''}${p.flag ? flagHTML(p.nat) : ''}</span>
+    ${rows.map((p) => `<div class="ci-pr" role="row"><span class="ci-pn"><span>${esc(p.name)}</span>${p.nonEC ? (gfxStrip('icnEC.bmp', 16, 10, 12, 4) ? `<span class="ci-ec" role="img" aria-label="Non EC Player" title="Non EC Player" style="background-image:url(${gfxStrip('icnEC.bmp', 16, 10, 12, 4)})"></span>` : '<span class="ci-ect" title="Non EC Player">EC</span>') : ''}${p.flag ? flagHTML(p.nat) : ''}</span>
       <span>${posIcon(p.line, lb)}</span><span>${roleIcon(p.role, lb)}</span><span class="r">${p.age}</span><span class="r">${p.rtg}</span><span class="r">${esc(p.value)}</span></div>`).join('')}</div></section>`;
   const draw = () => {
     const i = info, lb = i.labels, f = (k, v) => `<div class="ci-f"><span class="k">${esc(k)}</span><b>${esc(v)}</b></div>`;
