@@ -337,7 +337,6 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .ci-rolet{font-size:.7em;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ci-ec{flex:none;width:15px;height:18px;background-size:240px 18px;background-repeat:no-repeat;image-rendering:pixelated;animation:ciec 1.6s steps(16) infinite}
 @keyframes ciec{to{background-position:-240px 0}}
-@media (prefers-reduced-motion:reduce){.ci-ec{animation:none}}
 .ci-ect{font-size:.65em;font-weight:700;color:#B5403A}
 @media (max-height:500px){.ci-hd{padding:.3em .5em}.ci-body{padding:.5em .7em .7em}.ci-body h3{margin:.6em 0 .25em}.ci-kits{margin-top:.5em}}
 @media (max-width:640px){.ci-pr{grid-template-columns:minmax(0,1fr) 2.2em 3.2em 2.4em 2.6em 6.2em}}
@@ -517,6 +516,8 @@ function gfxCell(name, idx, w, h, perRow) {
   if (bm) { const per = perRow || Math.floor(bm.w / w), x = (idx % per) * w, y = Math.floor(idx / per) * h; if (x + w <= bm.w && y + h <= bm.h) url = bmpUrl(bm, x, y, w, h); }
   GFX.url.set(key, url); return url;
 }
+// true when the complete GFx\Main.bfs is stored (older versions kept only flags.bmp and shirts.bmp)
+function gfxComplete() { return !!(GFX.files && GFX.files['gfx/main.bfs']); }
 // all n cells of an animation as one horizontal strip (for a CSS steps() animation)
 function gfxStrip(name, n, w, h, perRow) {
   const key = name + ':strip'; if (GFX.url.has(key)) return GFX.url.get(key);
@@ -2443,7 +2444,8 @@ async function clubInfo(list, idx, onMove) {
         <h3>Ground</h3><div class="ci-row3">${f('Name', i.ground)}${f('Capacity', i.capacity)}</div>
         <h3>Player Assets</h3><div class="ci-row3">${f('First Team', i.firstTeam)}${f('Youth Team', i.youth)}</div>
         <h3>Ground Assets</h3><div class="ci-row3">${f('Stadium', i.stadium)}${f('Facilities', i.facilities)}${f('Features', i.features)}</div></div>`
-      : players(lb.lists[0] || 'First Team Players', i.squad, lb) + players(lb.lists[1] || 'Youth Players', i.youthPlayers, lb);
+      : players(lb.lists[0] || 'First Team Players', i.squad, lb) + players(lb.lists[1] || 'Youth Players', i.youthPlayers, lb)
+        + (gfxComplete() ? '' : '<p class="fr-note st-hint" style="margin-top:.6em">The original icons come from the folder GFx of your game. Choose your game files again (folder button on the start screen) and include the folder GFx.</p>');
     back.firstChild.innerHTML = `<header class="ci-hd">
         <button class="ci-nav" data-mv="-1" aria-label="Previous club" ${idx > 0 ? '' : 'disabled'}>◀</button><button class="ci-nav" data-mv="1" aria-label="Next club" ${idx < list.length - 1 ? '' : 'disabled'}>▶</button>
         <h2>${shirtHTML(i.home)}<span>${esc(i.name)}</span></h2>
@@ -2538,7 +2540,7 @@ function pickClub(data) {
       <div class="st-table" role="listbox" aria-label="${esc(data.title)}">
         <div class="st-body"><div class="st-row st-head" aria-hidden="true"><span>Club</span><span>Manager</span><span>Objective</span><span>Bank</span></div>${dv.clubs.map((cl) => `<button type="button" class="st-row" role="option" data-club="${cl.id}" aria-selected="${cl.id === sel}" ${cl.taken ? 'aria-disabled="true"' : ''}>
           <span class="st-c">${shirtHTML(cl.shirt)}<b>${esc(cl.name)}</b></span><span class="st-m"><span>${esc(cl.mgr)}</span>${flagHTML(cl.mgrNat)}</span><span>${esc(cl.obj)}</span><span class="r">${esc(cl.bank)}</span></button>`).join('')}</div>
-      </div>${SHIRTS.bm && FLAGS.url ? '' : '<p class="fr-note st-hint">Shirts and flags come from the folder GFx of your game. Choose your game files again (folder button) and include GFx to see them.</p>'}</div>`, { info: `<span class="k">Manager</span><b>${esc(data.manager)}</b><span>Choose a club, then Continue</span>`, go: sel ? go : null });
+      </div>${gfxComplete() ? '' : '<p class="fr-note st-hint">Shirts, flags and icons come from the folder GFx of your game. Choose your game files again (folder button) and include the folder GFx to see all of them.</p>'}</div>`, { info: `<span class="k">Manager</span><b>${esc(data.manager)}</b><span>Choose a club, then Continue</span>`, go: sel ? go : null });
     if (prev) $('.st-body').scrollTop = prev;
     natPicker($('#st-co'), countries, (id) => { ci = id; di = 0; sel = null; draw(); }, 'Country');
     natPicker($('#st-dv'), divisions, (id) => { di = id; sel = null; draw(); }, 'Division');
