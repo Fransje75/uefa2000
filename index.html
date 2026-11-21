@@ -279,6 +279,18 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .su input,.su select,.gs select{font:inherit;min-height:max(2.4em,40px);padding:.35em .6em;border:2px solid var(--line);border-radius:.55em;background:#fff;min-width:0;color:var(--ink)}
 .su input:disabled,.su select:disabled{background:#EEF0EC}
 .su-bar{display:flex;gap:.6em;align-items:center;margin-top:.6em}
+.flag{display:inline-block;flex:none;width:24px;height:18px;background:var(--flags) no-repeat;background-size:960px 54px;image-rendering:pixelated;vertical-align:middle}
+.nat{position:relative;min-width:0}
+.nat-btn{display:flex;align-items:center;gap:.5em;width:100%;font:inherit;text-align:left;min-height:max(2.4em,40px);padding:.35em .6em;border:2px solid var(--line);border-radius:.55em;background:#fff;color:var(--ink);cursor:pointer}
+.nat-btn:disabled{background:#EEF0EC;cursor:default}
+.nat-v{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nat-ar{flex:none;width:0;height:0;border:.32em solid transparent;border-top:.4em solid currentColor;border-bottom:0;margin-left:.1em}
+.nat-list{position:absolute;z-index:30;left:0;right:0;top:calc(100% + 4px);margin:0;padding:.25em 0;list-style:none;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:2px solid var(--line);border-radius:.55em;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.nat-list.up{top:auto;bottom:calc(100% + 4px)}
+.nat-list li{display:flex;align-items:center;gap:.5em;padding:.45em .7em;min-height:40px;cursor:pointer;color:var(--ink)}
+.nat-list li span{flex:1;min-width:0}
+.nat-list li[aria-selected="true"]{background:#E3EEE6;font-weight:600}
+.nat-list li:hover,.nat-list li:focus{background:#F3E2B5;outline:none}
 .su-bar .sp{flex:1}
 .gs{display:grid;grid-template-columns:max-content minmax(10em,16em);align-items:center;gap:.6em 1em;max-width:32em}
 .gs .su-bar{grid-column:1/-1}
@@ -345,13 +357,27 @@ const dbAll = (s) => dbOp(s, 'readonly', (st) => st.getAll());
 const dbKeys = (s) => dbOp(s, 'readonly', (st) => st.getAllKeys());
 
 // ------------------------------------------------------------ spelbestanden inlezen
-const NEEDED = /(^|\/)(uefa2000b\.exe|data\/(data\.bin|names\/.*|tables\/.*|tactics\/.*|training\/.*|configs\/.*)|scripts\/.*|controlsscripts\/.*|tabletextscript\/.*|textdescriptionscript\/.*)$/i;
+const NEEDED = /(^|\/)(uefa2000b\.exe|gfx\/main\.bfs|data\/(data\.bin|names\/.*|tables\/.*|tactics\/.*|training\/.*|configs\/.*)|scripts\/.*|controlsscripts\/.*|tabletextscript\/.*|textdescriptionscript\/.*)$/i;
 function normalize(paths) {
   // zoek de map waarin UEFA2000b.exe staat en maak alle paden daaraan relatief
   const exe = paths.find((p) => /(^|\/)uefa2000b\.exe$/i.test(p));
   if (!exe) return null;
   const root = exe.slice(0, exe.length - 'uefa2000b.exe'.length);
   return (p) => p.toLowerCase().startsWith(root.toLowerCase()) ? p.slice(root.length) : null;
+}
+// GFx\Main.bfs is an archive (u32 magic, u32 count, count x {u32 offset, u32 size, char name[16]}); only Flags.bmp is kept
+function bfsEntry(buf, want) {
+  const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength), n = dv.getUint32(4, true);
+  for (let k = 0; k < n && 8 + 24 * k + 24 <= buf.length; k++) {
+    const o = dv.getUint32(8 + 24 * k, true), sz = dv.getUint32(12 + 24 * k, true);
+    let name = ''; for (let i = 0; i < 16; i++) { const ch = buf[16 + 24 * k + i]; if (!ch) break; name += String.fromCharCode(ch); }
+    if (name.toLowerCase() === want && o + sz <= buf.length) return buf.slice(o, o + sz);
+  }
+  return null;
+}
+function keepGfx(files, rel, data) {
+  if (!/^gfx\/main\.bfs$/i.test(rel)) { files[rel] = data; return; }
+  try { const b = bfsEntry(data, 'flags.bmp'); if (b) files['gfx/flags.bmp'] = b; } catch (e) { /* flags are optional */ }
 }
 async function readZip(file) {
   const buf = new Uint8Array(await file.arrayBuffer()); const dv = new DataView(buf.buffer);
@@ -368,14 +394,14 @@ async function readZip(file) {
   const fix = normalize(Object.keys(out)); if (!fix) throw new Error('UEFA2000b.exe was not found in the zip file.');
   const files = {};
   for (const [name, f] of Object.entries(out)) { const rel = fix(name); if (!rel || !NEEDED.test(rel)) continue;
-    files[rel] = f.method === 0 ? f.raw.slice() : new Uint8Array(await new Response(new Blob([f.raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer()); }
+    keepGfx(files, rel, f.method === 0 ? f.raw.slice() : new Uint8Array(await new Response(new Blob([f.raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer())); }
   return files;
 }
 async function readFolder(fileList) {
   const list = [...fileList]; const fix = normalize(list.map((f) => f.webkitRelativePath || f.name));
   if (!fix) throw new Error('UEFA2000b.exe was not found. Choose the folder the game is installed in.');
   const files = {};
-  for (const f of list) { const rel = fix(f.webkitRelativePath || f.name); if (rel && NEEDED.test(rel)) files[rel] = new Uint8Array(await f.arrayBuffer()); }
+  for (const f of list) { const rel = fix(f.webkitRelativePath || f.name); if (rel && NEEDED.test(rel)) keepGfx(files, rel, new Uint8Array(await f.arrayBuffer())); }
   return files;
 }
 
@@ -385,6 +411,31 @@ function checkFiles(files) {
   const missing = REQUIRED.filter((r) => !have.has(r));
   if (missing.length) throw new Error('These files are missing: ' + missing.join(', ') + '. Make sure the folders Data, Scripts, ControlsScripts, TableTextScript and TextDescriptionScript and UEFA2000b.exe are included.');
   return files;
+}
+
+// ------------------------------------------------------------ flags (GFx\Main.bfs > Flags.bmp, like the original's image list 0x6007a0, built in 0x472177)
+const FLAGS = { url: null, cols: 40 };
+function loadFlags(files) {
+  FLAGS.url = null;
+  const b = files && files['gfx/flags.bmp']; if (!b || b[0] !== 0x42 || b[1] !== 0x4d) return;
+  try {
+    const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
+    const off = dv.getUint32(10, true), w = dv.getInt32(18, true), hh = dv.getInt32(22, true), bpp = dv.getUint16(28, true);
+    if (bpp !== 24 || w <= 0 || !hh) return;
+    const H = Math.abs(hh), stride = (w * 3 + 3) & ~3, cv = document.createElement('canvas'); cv.width = w; cv.height = H;
+    const cx = cv.getContext('2d'), img = cx.createImageData(w, H);
+    for (let y = 0; y < H; y++) { const row = off + (hh > 0 ? H - 1 - y : y) * stride;
+      for (let x = 0; x < w; x++) { const i = row + 3 * x, j = 4 * (y * w + x), bl = b[i], g = b[i + 1], r = b[i + 2];
+        img.data[j] = r; img.data[j + 1] = g; img.data[j + 2] = bl; img.data[j + 3] = (r === 255 && g === 0 && bl === 255) ? 0 : 255; } }
+    cx.putImageData(img, 0, 0); FLAGS.url = cv.toDataURL('image/png'); FLAGS.cols = Math.floor(w / 16);
+    document.documentElement.style.setProperty('--flags', `url(${FLAGS.url})`);
+  } catch (e) { FLAGS.url = null; }
+}
+// shown at 1.5x (24x18 css px), pixelated like the original 16x12 bitmaps
+function flagHTML(id) {
+  if (!FLAGS.url || !(id > 0)) return '';
+  const x = (id % FLAGS.cols) * 24, y = Math.floor(id / FLAGS.cols) * 18;
+  return `<i class="flag" aria-hidden="true" style="background-position:-${x}px -${y}px"></i>`;
 }
 
 // ------------------------------------------------------------ toestand + rendering
@@ -2138,7 +2189,7 @@ async function showSetup(msg) {
     <p>This web version plays with the original game code, so it needs your own installation of UEFA Manager 2000. The files stay on this device.</p>
     <div class="fr-row"><label class="btn">Choose the game folder<input type="file" id="dir" webkitdirectory directory multiple hidden></label>
       <label class="btn alt">Or choose a zip of the folder<input type="file" id="zip" accept=".zip,application/zip" hidden></label></div>
-    <p class="fr-note">Needed: the folder with UEFA2000b.exe and the folders Data, Scripts, ControlsScripts, TableTextScript and TextDescriptionScript. On a phone a zip file is easiest.</p>
+    <p class="fr-note">Needed: the folder with UEFA2000b.exe and the folders Data, Scripts, ControlsScripts, TableTextScript and TextDescriptionScript. Include the folder GFx as well to see the original flags. On a phone a zip file is easiest.</p>
     <p id="msg" class="${msg ? 'err' : ''}">${esc(msg || '')}</p>
     ${START.files ? '<div class="fr-row"><button class="btn alt" id="back">Back</button></div>' : ''}</div>`);
   const handle = async (fn) => {
@@ -2155,6 +2206,7 @@ async function showSetup(msg) {
 async function bootEngine(files) {
   waiting('UEFA Manager 2000', 'Starting the original game code…');
   if (!worker) startWorker();
+  loadFlags(files);
   S.boot = await rpc('boot', { files });
   START.files = true; START.busy = false; START.view = 'title';
   await showStart();
@@ -2219,18 +2271,22 @@ async function newGameFlow() {
 function setupView(msg) {
   START.view = 'name';
   const o = START.opts, st = START.setup;
-  const natOpts = (sel) => o.nationalities.map((n) => `<option value="${n.id}" ${n.id === sel ? 'selected' : ''}>${esc(n.name)}</option>`).join('');
+  const natName = (id) => (o.nationalities.find((n) => n.id === id) || { name: '' }).name;
+  const combo = (k, sel) => `<div class="nat" id="su-c${k}" data-v="${sel}">
+      <button type="button" class="nat-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="su-cl${k} su-cv${k}" ${k ? 'disabled' : ''}>
+        <span id="su-cv${k}" class="nat-v">${esc(natName(sel))}</span>${flagHTML(sel)}<span class="nat-ar" aria-hidden="true"></span></button></div>`;
   const row = (k) => `<div class="su-row ${k ? 'off' : ''}">
       <span class="su-sw" style="background:${MGR_COL[k]}"></span>
       <label for="su-n${k}">Manager</label><input id="su-n${k}" type="text" maxlength="40" autocomplete="${k ? 'off' : 'name'}" ${k ? 'disabled' : `value="${esc(st.name)}"`}>
-      <label for="su-c${k}">Nationality</label><select id="su-c${k}" ${k ? 'disabled' : ''}>${natOpts(k ? 1 : st.nationality)}</select></div>`;
+      <label id="su-cl${k}">Nationality</label>${combo(k, k ? 1 : st.nationality)}</div>`;
   frame(`<div class="fr-pane"><h1>Setup Manager(s)</h1>
     <form id="su" class="su" novalidate>${[0, 1, 2, 3].map(row).join('')}
       <p class="fr-note">Managers 2 to 4 (several players on one device) are not available in the web version yet.</p>
       <p id="su-msg" class="err" role="alert">${esc(msg || '')}</p>
       <div class="su-bar"><button type="button" class="btn alt" id="su-gs">Game Settings</button><span class="sp"></span>
         <button class="btn" id="su-ok">OK</button><button type="button" class="btn alt" id="su-x">Cancel</button></div></form></div>`);
-  const keep = () => { st.name = $('#su-n0').value; st.nationality = +$('#su-c0').value; };
+  const keep = () => { st.name = $('#su-n0').value; st.nationality = +$('#su-c0').dataset.v; };
+  natPicker($('#su-c0'), o.nationalities, (id) => { st.nationality = id; });
   $('#su-x').onclick = () => { START.view = 'title'; showStart(); };
   $('#su-gs').onclick = () => { keep(); settingsView(); };
   $('#su').onsubmit = async (e) => {
@@ -2243,6 +2299,36 @@ function setupView(msg) {
     catch (err) { failed('Starting a new game failed', err, () => newGameFlow()); }
   };
   if (!st.name) $('#su-n0').focus({ preventScroll: true });
+}
+// drop-down list with flags (a native <select> cannot show pictures)
+function natPicker(box, items, onPick) {
+  const btn = box.querySelector('.nat-btn');
+  const close = (focus) => { const l = box.querySelector('.nat-list'); if (l) l.remove(); btn.setAttribute('aria-expanded', 'false'); document.removeEventListener('pointerdown', outside, true); if (focus) btn.focus(); };
+  const outside = (e) => { if (!box.contains(e.target)) close(false); };
+  const pick = (id) => {
+    box.dataset.v = id; const n = items.find((x) => x.id === id);
+    btn.innerHTML = `<span class="nat-v" id="${btn.getAttribute('aria-labelledby').split(' ')[1]}">${esc(n.name)}</span>${flagHTML(id)}<span class="nat-ar" aria-hidden="true"></span>`;
+    onPick(id); close(true);
+  };
+  btn.onclick = () => {
+    if (box.querySelector('.nat-list')) { close(true); return; }
+    const cur = +box.dataset.v;
+    const l = h(`<ul class="nat-list" role="listbox" aria-label="Nationality">${items.map((n) => `<li role="option" aria-selected="${n.id === cur}" tabindex="-1" data-id="${n.id}"><span>${esc(n.name)}</span>${flagHTML(n.id)}</li>`).join('')}</ul>`).firstChild;
+    box.append(l); btn.setAttribute('aria-expanded', 'true');
+    // open upwards when there is more room above (landscape phones are low)
+    const r = btn.getBoundingClientRect(), below = innerHeight - r.bottom, above = r.top;
+    if (below < 220 && above > below) { l.classList.add('up'); l.style.maxHeight = Math.max(140, above - 12) + 'px'; } else l.style.maxHeight = Math.max(140, below - 12) + 'px';
+    const sel = l.querySelector('[aria-selected="true"]') || l.firstChild; sel.scrollIntoView({ block: 'center' }); sel.focus({ preventScroll: true });
+    l.onclick = (e) => { const li = e.target.closest('li'); if (li) pick(+li.dataset.id); };
+    l.onkeydown = (e) => {
+      const li = document.activeElement.closest('li'); if (!li) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); const nx = e.key === 'ArrowDown' ? li.nextElementSibling : li.previousElementSibling; if (nx) nx.focus(); }
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(+li.dataset.id); }
+      else if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); close(true); }
+      else if (e.key.length === 1) { const k = e.key.toLowerCase(); const m = [...l.children].find((x) => x.textContent.trim().toLowerCase().startsWith(k)); if (m) m.focus(); }
+    };
+    document.addEventListener('pointerdown', outside, true);
+  };
 }
 function settingsView() {
   const o = START.opts, st = START.setup.settings;
