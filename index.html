@@ -486,15 +486,14 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .fgb.red{background:#D2362E}.fgb.blue{background:#2F5BD6}.fgb.orange{background:#E8822E}
 .ft-wait{padding:2em;color:var(--muted)}
 /* Team Selection */
-.ts{--tsrow:24px;display:grid;grid-template-columns:minmax(0,1.22fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:1.2vh;padding:1.2vh;height:100%;box-sizing:border-box}
+.ts{--tsrow:clamp(22px,3.7vh,28px);display:grid;grid-template-columns:minmax(0,1.22fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:1.2vh;padding:1.2vh;height:100%;box-sizing:border-box}
 .ts.exp{grid-template-columns:minmax(0,1fr)}
 .ts-top{grid-column:1/-1;display:flex;align-items:center;gap:1em;flex-wrap:wrap}
 .ts-sel{display:flex;align-items:center;gap:.45em}
 .ts-sel span{font:600 .74em var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .ts-sel select{width:auto;min-width:8em;font-size:.95em;padding:.3em .6em;min-height:max(2em,30px);border-radius:.45em;border:1.5px solid var(--line)}
-.ts-lists,.ts-tasks{min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:.8vh}
-.ts-res{flex:1;min-height:0;display:flex;flex-direction:column}
-.ts-res .ts-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.ts-lists,.ts-tasks{min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:.8vh}
+
 .ts-sec{background:#fff;border:1px solid var(--line);border-radius:.55em;overflow:hidden;flex:none}
 .ts-sec h3{margin:0;padding:.35em .7em;font:600 .78em/1 var(--body);text-transform:uppercase;letter-spacing:.07em;color:#fff;background:var(--turf)}
 .ts-row{display:grid;grid-template-columns:5px 1.9em minmax(0,1fr) 1.7em 2.6em 2.1em;align-items:center;gap:.4em;padding-right:.55em;height:var(--tsrow);border-top:1px solid #EDF0EB;font-size:clamp(9px,calc(var(--tsrow) * .6),15px);
@@ -554,7 +553,7 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
   .gb-prog{width:3.5em}
   .gm{padding:1px .5em}.gm .shirt{width:1.6em;height:1.6em}.gm-txt span{display:none}
   .gm-mid{display:flex;align-items:center;gap:.3em}
-  .ts{gap:5px;padding:5px}.ts-lists,.ts-tasks{gap:3px}.ts-sec h3{padding:.25em .6em;font-size:.72em}.ts-side{gap:4px}
+  .ts-tasks{max-height:42vh}.ts{gap:5px;padding:5px}.ts-lists,.ts-tasks{gap:3px}.ts-sec h3{padding:.25em .6em;font-size:.72em}.ts-side{gap:4px}
   .ts-sel select{min-height:26px;padding:.15em .5em}.fgb.tsb{min-height:26px;padding:.25em .8em}
   .ft{gap:6px;padding:6px}.ft-r{gap:6px}.fg{gap:4px;padding:4px}.fgb{min-height:24px;padding:.25em .7em}.ft h3{padding:.35em .6em}.fc-hd{padding:.2em .4em}.fc-nav{height:1.5em}
   .gd-date{padding:.25em .45em}
@@ -2774,14 +2773,6 @@ function viewTeamSel() {
     ${exp ? '' : `<div class="ts-side"><div class="ts-tasks">${TS_TASKS.map(task).join('')}</div><div class="ts-pw">${pitch}</div>${btns}</div>`}
   </div>`;
 }
-function tsFit() {
-  const root = $('.ts'), box = $('#ts-lists'); if (!root || !box) return;
-  const n = box.querySelectorAll('.ts-xi .ts-body .ts-row, .ts-subs .ts-body .ts-row').length + 2;
-  let fixed = 0; box.querySelectorAll('.ts-sec h3, .ts-row.ts-h').forEach((e) => { fixed += e.offsetHeight; });
-  const gap = parseFloat(getComputedStyle(box).rowGap) || 0, h = Math.floor((box.clientHeight - fixed - 2 * gap - 8) / n);
-  root.style.setProperty('--tsrow', Math.max(13, Math.min(30, h)) + 'px');
-}
-addEventListener('resize', () => { if (S.tab === 'teamsel') tsFit(); });
 async function loadTeamSel() {
   if (S.tsLoading) return; S.tsLoading = true;
   try { const r = await rpc('teamsel'); S.ts = S.ts || {}; S.ts.data = r.ts; if (r.frame) S.fr = r.frame; } catch (e) { toast('Error: ' + e.message); }
@@ -2840,7 +2831,7 @@ function tsMove(d) {
   if (d.over && d.over !== t) d.over.classList.remove('ts-over');
   d.over = t && t !== d.row ? t : null; if (d.over) d.over.classList.add('ts-over');
   clearInterval(d.scroll); d.scroll = null;
-  for (const box of document.querySelectorAll('#ts-res')) { const br = box.getBoundingClientRect();
+  for (const box of document.querySelectorAll('#ts-lists, .ts-tasks')) { const br = box.getBoundingClientRect();
     if (d.x < br.left || d.x > br.right || d.y < br.top - 30 || d.y > br.bottom + 30) continue;
     const v = d.y < br.top + 32 ? -1 : d.y > br.bottom - 32 ? 1 : 0; if (v) d.scroll = setInterval(() => { box.scrollTop += v * 10; tsMove(d); }, 30); }
 }
@@ -2927,10 +2918,10 @@ function renderGame() {
   if (!S.scr) { S.scr = 'today'; S.tab = 'today'; S.open = 'today'; S.hist = ['today']; S.hpos = 0; }
   const old = { mail: viewMail, squad: viewSquad, table: viewComp, menu: viewMenu }[S.tab];
   const body = old ? `<div class="gf-old" lang="nl">${old()}</div>` : S.tab === 'teamsel' ? viewTeamSel() : viewToday();
-  const m = $('#gfm'), keep = m && S.lastScr === S.scr ? m.scrollTop : 0, rs = S.lastScr === S.scr ? $('#ts-res')?.scrollTop : 0;
+  const m = $('#gfm'), keep = m && S.lastScr === S.scr ? m.scrollTop : 0, rs = S.lastScr === S.scr && $('#ts-lists') ? [$('#ts-lists').scrollTop, $('.ts-tasks')?.scrollTop || 0] : null;
   app.innerHTML = gframe(body); S.lastScr = S.scr;
   if (keep) $('#gfm').scrollTop = keep;
-  if (S.tab === 'teamsel') { tsFit(); if (rs && $('#ts-res')) $('#ts-res').scrollTop = rs; }
+  if (S.tab === 'teamsel' && rs) { if ($('#ts-lists')) $('#ts-lists').scrollTop = rs[0]; if ($('.ts-tasks')) $('.ts-tasks').scrollTop = rs[1]; }
   if (S.tab === 'today') drawGraphs();
   if (S.tab === 'today' && (!S.ft || !S.ft.data) && !S.ftLoading) loadToday(!S.ftOpened && (S.ftOpened = true));
   else if (!S.fr && !S.frLoading) { S.frLoading = true; rpc('screen', { key: S.scr }).then((r) => { S.fr = r.frame; S.frLoading = false; renderGame(); }).catch(() => { S.frLoading = false; }); }
