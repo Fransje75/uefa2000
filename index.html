@@ -630,7 +630,7 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .msg-back{z-index:60}
 .ci.msg{width:min(560px,100%);height:auto;max-height:100%}
 .msg-t{margin:.6em .4em;text-align:center;font-size:1.1em;font-weight:600;line-height:1.4}
-.msg-ft{justify-content:space-between;gap:.8em}.msg-ch{display:flex;flex-wrap:wrap;gap:.5em}
+.msg-ft{justify-content:space-between;gap:.8em}.msg-ch{display:flex;flex-wrap:wrap;gap:.5em;margin-right:auto}
 .msg-x{padding:0;width:3.2em;display:grid;place-items:center}.msg-x svg{width:1.25em;height:1.25em}
 @media (max-height:460px){.ci.md{font-size:12px}.md-r{min-height:1.55em}.md-body{padding:.4em .5em .5em}.md-info{margin-top:.5em;gap:.3em 1em}.md-st{gap:.35em}.md-bar{height:1.7em}.md-evb{max-height:9em}.md-fb{max-height:6.4em}.md-ft .btn,.md-fin .mf-ft .btn{min-height:34px;padding:5px 16px;font-size:14px}.md-ft,.md-fin .mf-ft{padding:.35em .8em}}
 .sv-b{display:grid;grid-template-columns:1fr 1fr;gap:1.2em;min-height:0}
@@ -2845,12 +2845,14 @@ async function tsRolePopup(list, idx) {
 }
 // Berichtvenster van het origineel ("UEFA Manager 2000", 0x601900 via 0x4bf510: tekst uit teksttabel 0x5f, knoppen uit een tabel, rode X = annuleren).
 // Geeft de sleutel van de gekozen knop terug, of null bij de rode X, Esc of tikken naast het venster.
-function uefaMsg(text, choices) {
+// Zonder keuzes (ja/nee-vraag, zoals "Are you sure ..."): rode knop met vinkje (geeft true) en rode X (null).
+function uefaMsg(text, choices = null) {
   return new Promise((res) => {
     const back = h(`<div class="ci-back msg-back" role="alertdialog" aria-modal="true" aria-label="UEFA Manager 2000"><div class="ci msg">
       <header class="ci-hd"><h2><span>UEFA Manager 2000</span></h2></header>
       <div class="ci-body"><p class="msg-t">${esc(text)}</p></div>
-      <footer class="mf-ft msg-ft"><div class="msg-ch">${choices.map(([l], i) => `<button class="btn" data-i="${i}">${esc(l)}</button>`).join('')}</div>
+      <footer class="mf-ft msg-ft"><div class="msg-ch">${choices ? choices.map(([l], i) => `<button class="btn" data-i="${i}">${esc(l)}</button>`).join('') : ''}</div>
+        ${choices ? '' : `<button class="btn red msg-x" data-yes aria-label="Yes" title="Yes"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.8 8.6l3.5 3.5 7-8" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`}
         <button class="btn red msg-x" data-x aria-label="Cancel" title="Cancel"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/></svg></button></footer></div></div>`).firstChild;
     const done = (k) => { back.remove(); document.removeEventListener('keydown', key, true); res(k); };
     const key = (e) => { if (e.key === 'Escape') { e.stopImmediatePropagation(); done(null); } };
@@ -2858,8 +2860,9 @@ function uefaMsg(text, choices) {
     back.addEventListener('click', (e) => { if (e.target === back) done(null); });
     back.querySelectorAll('[data-i]').forEach((b) => b.onclick = () => done(choices[+b.dataset.i][1]));
     back.querySelector('[data-x]').onclick = () => done(null);
+    const yes = back.querySelector('[data-yes]'); if (yes) yes.onclick = () => done(true);
     document.body.append(back);
-    back.querySelector('[data-i]').focus({ preventScroll: true });
+    (yes || back.querySelector('[data-i]')).focus({ preventScroll: true });
   });
 }
 // Match Rules ("Pop Rules", vtable 0x58a6b0, init 0x4d7f10, vullen 0x4d8060; teksttabel 0x3d): alleen tonen, help 095
@@ -3254,7 +3257,7 @@ async function saveLoadPopup(mode, onCancel) {
   document.addEventListener('keydown', key);
   back.addEventListener('click', (e) => { if (e.target === back) close(); });
   const v = (x) => (x == null || x === '' ? '—' : x);
-  const confirm = (msg) => new Promise((res) => gSheet(load ? 'Load Game' : 'Save Game', `<p class="sub" style="margin:10px 18px">${esc(msg)}</p>`, [['Yes', 'ok'], ['No', 'x']], (k) => { res(k === 'ok'); return true; }).querySelector('[data-k="x"]').addEventListener('click', () => res(false)));
+  const confirm = async (msg) => (await uefaMsg(msg)) === true; // berichtvenster van het origineel: vinkje / rode X
   const draw = () => {
     const m = sel ? sel.meta : null, f = m && m.dateFmt;
     back.firstChild.innerHTML = `<header class="ci-hd"><h2><span>${load ? 'Load Game' : 'Save Game'}</span></h2><button class="ci-nav mf-help" data-help aria-label="Help">?</button></header>
