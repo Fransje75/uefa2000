@@ -541,8 +541,6 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .ts-ro[aria-pressed=true]{background:var(--turf);color:#fff}
 .ts-star{color:#E0A100}.ts-tick{color:#2E8B57;font-weight:700}
 .ts-ro[aria-pressed=true] .ts-star,.ts-ro[aria-pressed=true] .ts-tick{color:#fff}
-.ts-rules{margin:8px 18px}.ts-rules div{display:flex;justify-content:space-between;gap:2em;padding:.35em 0;border-bottom:1px solid var(--line)}
-.ts-rules b.yes{color:#2E8B57}.ts-rules b.no{color:#B5403A}
 @media (max-height:500px){
   .gf{--side:clamp(170px,26vw,220px);font-size:12px}
   .gf-logo{display:none}
@@ -625,6 +623,10 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .md-ft2 .md-r>span:last-child{text-align:right}
 .md-fb{max-height:9.6em;overflow-y:auto;overscroll-behavior:contain}
 .md-r.md-tot{font-weight:700;background:#F2F5F0}
+.ci.rl{width:min(360px,100%);height:auto;max-height:100%}
+.rl-t .md-r{grid-template-columns:minmax(0,1fr) 3.2em;padding:0 .8em;min-height:2em}
+.rl-t .md-r>b{justify-self:center;font-weight:700;display:flex}
+.rl-ic{width:1.15em;height:1.15em}
 @media (max-height:460px){.ci.md{font-size:12px}.md-r{min-height:1.55em}.md-body{padding:.4em .5em .5em}.md-info{margin-top:.5em;gap:.3em 1em}.md-st{gap:.35em}.md-bar{height:1.7em}.md-evb{max-height:9em}.md-fb{max-height:6.4em}.md-ft .btn,.md-fin .mf-ft .btn{min-height:34px;padding:5px 16px;font-size:14px}.md-ft,.md-fin .mf-ft{padding:.35em .8em}}
 .sv-b{display:grid;grid-template-columns:1fr 1fr;gap:1.2em;min-height:0}
 .sv-l{display:flex;flex-direction:column;gap:.6em;min-height:0}
@@ -2836,9 +2838,25 @@ async function tsRolePopup(list, idx) {
   el.classList.add('ts-rsheet');
   el.addEventListener('click', (e) => { const b = e.target.closest('[data-role]'); if (!b || b.disabled) return; pick = +b.dataset.role; el.querySelectorAll('[data-role]').forEach((x) => x.setAttribute('aria-pressed', String(+x.dataset.role === pick))); });
 }
+// Match Rules ("Pop Rules", vtable 0x58a6b0, init 0x4d7f10, vullen 0x4d8060; teksttabel 0x3d): alleen tonen, help 095
+const RL_YES = '<svg class="rl-ic" viewBox="0 0 16 16" role="img" aria-label="Yes"><path d="M2.5 8.6l3.6 3.6 7.4-8.4" fill="none" stroke="#1E9E45" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const RL_NO = '<svg class="rl-ic" viewBox="0 0 16 16" role="img" aria-label="No"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="#D8242C" stroke-width="2.6" stroke-linecap="round"/></svg>';
 async function tsRules() {
   let R; try { R = await rpc('teamselRules'); } catch (e) { return toast('Error: ' + e.message); }
-  gSheet('Match Rules', `<div class="ts-rules">${R.rows.map(([t, v]) => `<div><span>${esc(t)}</span><b class="num">${v}</b></div>`).join('')}${R.flags.map(([t, on]) => `<div><span>${esc(t)}</span><b class="${on ? 'yes' : 'no'}" aria-label="${on ? 'Yes' : 'No'}">${on ? '✓' : '✗'}</b></div>`).join('')}</div>`, [['OK', 'x']], () => true);
+  const back = h(`<div class="ci-back" role="dialog" aria-modal="true" aria-label="Match Rules"><div class="ci rl">
+    <header class="ci-hd"><h2><span>Match Rules</span></h2><button class="ci-nav mf-help" data-help aria-label="Help">?</button></header>
+    <div class="ci-body"><section class="md-sec"><div class="md-t rl-t" role="table"><div class="md-r md-h" role="row"><span>Description</span><span></span></div>
+      ${R.rows.map(([t, v]) => `<div class="md-r" role="row"><span>${esc(t)}</span><b class="num">${v}</b></div>`).join('')}
+      ${R.flags.map(([t, on]) => `<div class="md-r" role="row"><span>${esc(t)}</span><b>${on ? RL_YES : RL_NO}</b></div>`).join('')}</div></section></div>
+    <footer class="mf-ft"><button class="btn" data-ok>OK</button></footer></div></div>`).firstChild;
+  const close = () => { back.remove(); document.removeEventListener('keydown', key); };
+  const key = (e) => { if (e.key === 'Escape' && !document.querySelector('.gsheet')) close(); };
+  document.addEventListener('keydown', key);
+  back.addEventListener('click', (e) => { if (e.target === back) close(); });
+  document.body.append(back);
+  back.querySelector('[data-ok]').onclick = close;
+  back.querySelector('[data-help]').onclick = () => helpSheet(95);
+  back.querySelector('[data-ok]').focus({ preventScroll: true });
 }
 async function tsShowPlayer(id) {
   if (!S.squad) { try { const r = await rpc('squad', { club: S.dash.club.id }); S.squad = r.squad; S.nats = r.nats; } catch (e) { return; } }
