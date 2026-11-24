@@ -528,7 +528,8 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .ts-c{display:grid;place-items:center}.ts-n{text-align:right}
 .ts-row .ci-pos{width:1.35em;height:1.35em;font-size:.72em}
 .ts-row .ci-role{width:2.3em;height:1.15em}
-.ts-side{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:1vh;min-height:0;min-width:0}
+.ts-side{display:grid;grid-template-rows:auto minmax(0,1fr);gap:1vh;min-height:0;min-width:0}
+.ts-pb{display:grid;grid-template-rows:minmax(0,1fr) auto;gap:1vh;min-height:0;min-width:0}
 .ts-pw{min-height:0;min-width:0;display:grid;place-items:center;container-type:size}
 .ts-pitch{position:relative;width:var(--pwW,min(100cqw,calc(100cqh * 4 / 3)));aspect-ratio:4/3;container-type:inline-size;border-radius:.4em;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);
   background:repeating-linear-gradient(90deg,#3F8F3A 0 6.25%,#4A9B43 6.25% 12.5%)}
@@ -556,7 +557,14 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
   .gb-prog{width:3.5em}
   .gm{padding:1px .5em}.gm .shirt{width:1.6em;height:1.6em}.gm-txt span{display:none}
   .gm-mid{display:flex;align-items:center;gap:.3em}
-  .ts-tasks{max-height:42vh}.ts{gap:5px;padding:5px}.ts-lists,.ts-tasks{gap:3px}.ts-sec h3{padding:.25em .6em;font-size:.72em}.ts-side{gap:4px}
+  /* lage schermen (iPhone): takenlijsten altijd helemaal in beeld; Last Meeting / Rules / Delegate! onder elkaar rechts naast het veldje, even breed (wens Kevin 24-11) */
+  .ts-pb{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:stretch}.ts-pb .ts-btns{align-self:center}
+  .ts:not(.exp) .ts-top{flex-wrap:nowrap;gap:.6em}.ts:not(.exp) .ts-sel{gap:.35em;min-width:0}.ts:not(.exp) .ts-sel span{font-size:.62em}.ts:not(.exp) .ts-sel select{min-width:6.5em}
+  .ts-pb .ts-btns{display:grid;grid-template-columns:1fr;gap:5px}
+  .ts:not(.exp) .ts-top{grid-column:1}.ts:not(.exp) .ts-side{grid-column:2;grid-row:1/3}
+  .ts-tasks{--tsrow:20px;overflow:visible}.ts-tasks .ts-sec h3{padding:.2em .6em;font-size:.66em}
+  .ts-pb .fgb.tsb{min-height:24px;padding:.2em .7em;font-size:.95em}
+  .ts{gap:5px;padding:5px}.ts-lists,.ts-tasks{gap:3px}.ts-sec h3{padding:.25em .6em;font-size:.72em}.ts-side{gap:4px}
   .ts-sel select{min-height:26px;padding:.15em .5em}.fgb.tsb{min-height:26px;padding:.25em .8em}
   .ft{gap:6px;padding:6px}.ft-r{gap:6px}.fg{gap:4px;padding:4px}.fgb{min-height:24px;padding:.25em .7em}.ft h3{padding:.35em .6em}.fc-hd{padding:.2em .4em}.fc-nav{height:1.5em}
   .gd-date{padding:.25em .45em}
@@ -3122,7 +3130,7 @@ function viewTeamSel() {
   return `<div class="ts ${exp ? 'exp' : ''}">
     <div class="ts-top">${sel('ts-view', 'View Mode', [['norm', 'Normal'], ['exp', 'Expanded']], exp ? 'exp' : 'norm')}${sel('ts-tac', 'Your Tactics', presets, D.formation)}${exp ? btns : ''}</div>
     <div class="ts-lists" id="ts-lists">${['xi', 'subs', 'res'].map(sec).join('')}</div>
-    ${exp ? '' : `<div class="ts-side"><div class="ts-tasks">${TS_TASKS.map(task).join('')}</div><div class="ts-pw">${pitch}</div>${btns}</div>`}
+    ${exp ? '' : `<div class="ts-side"><div class="ts-tasks">${TS_TASKS.map(task).join('')}</div><div class="ts-pb"><div class="ts-pw">${pitch}</div>${btns}</div></div>`}
   </div>`;
 }
 async function loadTeamSel() {
