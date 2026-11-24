@@ -349,8 +349,7 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .ci-pos.p0{background:#52CE29}.ci-pos.p1{background:#FFCE00}.ci-pos.p2{background:#296BDE;color:#fff}.ci-pos.p3{background:#FF4A63}
 .ci-role{width:36px;height:18px;display:block}
 .ci-rolet{font-size:.7em;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ci-ec{flex:none;width:15px;height:18px;background-size:240px 18px;background-repeat:no-repeat;image-rendering:pixelated;animation:ciec 1.6s steps(16) infinite}
-@keyframes ciec{to{background-position:-240px 0}}
+.ci-ec{flex:none;width:15px;height:18px;display:inline-block;vertical-align:middle}
 .ci-ect{font-size:.65em;font-weight:700;color:#B5403A}
 @media (max-height:500px){.ci-hd{padding:.3em .5em}.ci-body{padding:.5em .7em .7em}.ci-body h3{margin:.6em 0 .25em}.ci-kits{margin-top:.5em}}
 @media (max-width:640px){.ci-pr{grid-template-columns:minmax(0,1fr) 2.2em 3.2em 2.4em 2.6em 6.2em}}
@@ -517,8 +516,7 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .ts-row.ts-h{height:auto;padding-top:.2em;padding-bottom:.2em;font-size:clamp(9px,calc(var(--tsrow) * .44),12px);font-weight:600;color:var(--muted);background:#F2F5F0;cursor:default;border-top:0}
 .ts-row.empty{cursor:default}
 .ts-row{overflow:hidden}
-.ts-row .ci-ec,.ts-ghost .ci-ec{width:.95em;height:1.14em;background-size:15.2em 1.14em;animation:tsec 1.6s steps(16) infinite}
-@keyframes tsec{to{background-position:-15.2em 0}}
+.ts-row .ci-ec,.ts-ghost .ci-ec{width:.95em;height:1.14em}
 .ts-row.sel{background:#11335A;color:#FFD54A}.ts-row.sel .ts-no{color:#FFD54A}
 .ts-bar{align-self:stretch;display:block}
 .ts-bar.b0{background:#52CE29}.ts-bar.b1{background:#FFCE00}.ts-bar.b2{background:#296BDE}.ts-bar.b3{background:#FF4A63}
@@ -966,7 +964,25 @@ const VEC = (() => {
       + `<rect x=".6" y=".6" width="22.8" height="10.8" ${line}/><path d="M12,.6 V11.4" ${line}/><circle cx="12" cy="6" r="1.7" ${line}/><rect x=".6" y="3.4" width="2.6" height="5.2" ${line}/><rect x="20.8" y="3.4" width="2.6" height="5.2" ${line}/>${dot}<\/svg>`);
     cache.set(k, url); return url;
   }
-  return { flag, shirt, role, POSCOL };
+  // wereldbol (eigen ontwerp, statisch) in plaats van het draaiende Non EC-balletje icnEC.bmp (10x12); wens Kevin 24-11
+  function globe() {
+    const k = 'globe'; if (cache.has(k)) return cache.get(k);
+    const land = 'fill="#58B84A" stroke="#2F7A2B" stroke-width=".35" stroke-linejoin="round"';
+    const grid = 'fill="none" stroke="#fff" stroke-opacity=".28" stroke-width=".4"';
+    const url = svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 24" width="80" height="96"><defs>`
+      + `<radialGradient id="o" cx=".38" cy=".34" r=".75"><stop offset="0" stop-color="#6FB8F0"/><stop offset=".6" stop-color="#2F7DCB"/><stop offset="1" stop-color="#1A4E92"/><\/radialGradient>`
+      + `<clipPath id="c"><circle cx="10" cy="12" r="8.6"/><\/clipPath><\/defs>`
+      + `<circle cx="10" cy="12" r="8.6" fill="url(#o)"/><g clip-path="url(#c)">`
+      + `<path d="M8.4,6.2 C9.6,5.4 11.8,5.6 12.8,6.6 C13.6,7.4 12.6,8.4 11.6,8.6 C10.6,8.8 10.4,9.8 9.2,9.6 C8.2,9.4 7.4,8.6 7.6,7.6 C7.7,7 8,6.5 8.4,6.2 Z" ${land}/>`
+      + `<path d="M9.2,10.8 C10.8,10.3 13,10.8 13.7,12.5 C14.3,14.3 13.1,16 12.3,17.6 C11.7,18.9 10.8,19.4 10.5,18.1 C10.2,16.7 9.3,15.7 8.5,14.7 C7.6,13.6 7.8,11.3 9.2,10.8 Z" ${land}/>`
+      + `<path d="M14.2,5.6 C16,5.8 18,7.4 19,9.6 C19.2,11 17.4,11.2 16,10.6 C15,10.2 14.2,9.6 13.8,8.6 C13.6,7.4 13.6,6.2 14.2,5.6 Z" ${land}/>`
+      + `<path d="M1.2,8.6 C2.6,7.8 4.4,8.6 4.9,10.2 C5.3,11.6 4.5,12.7 4.7,14.1 C4.9,15.6 4.2,17.4 3.3,17 C1.8,15.2 0.8,12.4 1.2,8.6 Z" ${land}/>`
+      + `<ellipse cx="10" cy="12" rx="4.3" ry="8.6" ${grid}/><path d="M10,3.4 V20.6 M1.4,12 H18.6 M2.6,7.6 H17.4 M2.6,16.4 H17.4" ${grid}/><\/g>`
+      + `<ellipse cx="7.2" cy="8" rx="2.6" ry="1.6" fill="#fff" fill-opacity=".32" transform="rotate(-30 7.2 8)"/>`
+      + `<circle cx="10" cy="12" r="8.6" fill="none" stroke="#0E2F55" stroke-width=".8"/><\/svg>`);
+    cache.set(k, url); return url;
+  }
+  return { flag, shirt, role, globe, POSCOL };
 })();
 
 // Inflate/deflate in gewone JS, voor browsers zonder DecompressionStream/CompressionStream (Safari < 16.4, bv. iPad Air 2 met iPadOS 15).
@@ -1258,6 +1274,8 @@ function gfxCell(name, idx, w, h, perRow) {
   GFX.url.set(key, url); return url;
 }
 // true when the complete GFx\Main.bfs is stored (older versions kept only flags.bmp and shirts.bmp)
+// Non EC Player: statische vector-wereldbol (VEC.globe) in plaats van het draaiende balletje icnEC.bmp uit GFx (wens Kevin 24-11)
+function ecHTML() { return `<img class="ci-ec" src="${VEC.globe()}" alt="Non EC Player" title="Non EC Player">`; }
 function gfxComplete() { return !!(GFX.files && GFX.files['gfx/main.bfs']); }
 // all n cells of an animation as one horizontal strip (for a CSS steps() animation)
 function gfxStrip(name, n, w, h, perRow) {
@@ -3071,7 +3089,7 @@ const TS_IC = {
   retiring: ['Retiring', '<circle cx="8" cy="8" r="6.5" fill="#fff" stroke="#55606B" stroke-width="1.4"/><path d="M8 4v4l2.5 2" stroke="#55606B" stroke-width="1.5" fill="none"/>'],
 };
 function tsIcon(k) {
-  if (k === 'nonEC') { const u = gfxStrip('icnEC.bmp', 16, 10, 12, 4); return u ? `<span class="ci-ec" role="img" aria-label="Non EC Player" title="Non EC Player" style="background-image:url(${u})"></span>` : '<span class="ci-ect" title="Non EC Player">EC</span>'; }
+  if (k === 'nonEC') return ecHTML();
   const d = TS_IC[k]; return d ? `<svg class="ts-ic" viewBox="0 0 16 16" role="img" aria-label="${d[0]}"><title>${d[0]}</title>${d[1]}</svg>` : '';
 }
 function tsRow(r, list, i, exp, bar, sel) {
@@ -4022,7 +4040,7 @@ async function showSetup(msg) {
   const folder = !ios && 'webkitdirectory' in document.createElement('input');
   const need = [['UEFA2000b.exe', 'Required', 'The game itself'], ['Data', 'Required', 'Database, names, tables, tactics, training'],
     ['Scripts, ControlsScripts', 'Required', 'Mail, reports and button texts'], ['TableTextScript, TextDescriptionScript', 'Required', 'All other texts'],
-    ['Help\\English', 'Optional', 'Help texts (the ? buttons)'], ['GFx\\Main.bfs', 'Optional', 'Non EC icon']];
+    ['Help\\English', 'Optional', 'Help texts (the ? buttons)']];
   frame(`<div class="fr-pane gfs"><h1>Game Files</h1>
     <p class="fr-note">This web version runs the original game code, so it needs your own installation of UEFA Manager 2000. The files stay on this device.</p>
     <section class="md-sec"><h3>Choose</h3>
@@ -4159,7 +4177,7 @@ async function clubInfo(list, idx, onMove) {
   back.addEventListener('click', (e) => { if (e.target === back) close(); });
   const players = (title, rows, lb) => `<section class="ci-sec"><h3>${esc(title)}</h3>
     <div class="ci-tab" role="table"><div class="ci-pr ci-ph" role="row"><span>Name</span><span>Pos</span><span>Role</span><span class="r">Age</span><span class="r">Rtg</span><span class="r">Value</span></div>
-    ${rows.map((p) => `<div class="ci-pr" role="row"><span class="ci-pn"><span>${esc(p.name)}</span>${p.nonEC ? (gfxStrip('icnEC.bmp', 16, 10, 12, 4) ? `<span class="ci-ec" role="img" aria-label="Non EC Player" title="Non EC Player" style="background-image:url(${gfxStrip('icnEC.bmp', 16, 10, 12, 4)})"></span>` : '<span class="ci-ect" title="Non EC Player">EC</span>') : ''}${p.flag ? flagHTML(p.nat) : ''}</span>
+    ${rows.map((p) => `<div class="ci-pr" role="row"><span class="ci-pn"><span>${esc(p.name)}</span>${p.nonEC ? ecHTML() : ''}${p.flag ? flagHTML(p.nat) : ''}</span>
       <span>${posIcon(p.line, lb)}</span><span>${roleIcon(p.role, lb)}</span><span class="r">${p.age}</span><span class="r">${p.rtg}</span><span class="r">${esc(p.value)}</span></div>`).join('')}</div></section>`;
   const draw = () => {
     const i = info, lb = i.labels, f = (k, v) => `<div class="ci-f"><span class="k">${esc(k)}</span><b>${esc(v)}</b></div>`;
@@ -4169,8 +4187,7 @@ async function clubInfo(list, idx, onMove) {
         <h3>Ground</h3><div class="ci-row3">${f('Name', i.ground)}${f('Capacity', i.capacity)}</div>
         <h3>Player Assets</h3><div class="ci-row3">${f('First Team', i.firstTeam)}${f('Youth Team', i.youth)}</div>
         <h3>Ground Assets</h3><div class="ci-row3">${f('Stadium', i.stadium)}${f('Facilities', i.facilities)}${f('Features', i.features)}</div></div>`
-      : players(lb.lists[0] || 'First Team Players', i.squad, lb) + players(lb.lists[1] || 'Youth Players', i.youthPlayers, lb)
-        + (gfxComplete() || !(i.squad || []).concat(i.youthPlayers || []).some((p) => p.nonEC) ? '' : '<p class="fr-note st-hint" style="margin-top:.6em">The animated Non EC ball comes from the folder GFx of your game. Choose your game files again (folder button on the start screen) and include the folder GFx.</p>');
+      : players(lb.lists[0] || 'First Team Players', i.squad, lb) + players(lb.lists[1] || 'Youth Players', i.youthPlayers, lb);
     back.firstChild.innerHTML = `<header class="ci-hd">
         <button class="ci-nav" data-mv="-1" aria-label="Previous club" ${idx > 0 ? '' : 'disabled'}>◀</button><button class="ci-nav" data-mv="1" aria-label="Next club" ${idx < list.length - 1 ? '' : 'disabled'}>▶</button>
         <h2>${shirtHTML(i.home)}<span>${esc(i.name)}</span></h2>
