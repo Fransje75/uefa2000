@@ -552,7 +552,7 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .ts-src{opacity:.35}
 .ts-row.ts-over{background:#FFF1CF;box-shadow:inset 0 0 0 2px var(--amber)}
 /* Pitch Tactics: veld links over de volle hoogte, rechts de statistieken en daaronder de knoppen */
-div.pt{display:grid;grid-template-columns:minmax(0,1fr) clamp(190px,33%,300px);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"top stats" "pitch stats" "pitch btns";gap:1.2vh;padding:1.2vh;height:100%;box-sizing:border-box}
+div.pt{display:grid;grid-template-columns:minmax(0,1fr) clamp(190px,33%,300px);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"top top" "pitch stats" "btns btns";gap:1.2vh;padding:1.2vh;height:100%;box-sizing:border-box}
 .pt-top{grid-area:top}.pt-pw{grid-area:pitch;place-items:start center}.pt-stats{grid-area:stats}.pt-btns{grid-area:btns}
 .pt-pitch{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .pt-dot{cursor:grab;z-index:2}.pt-dot.pt-drag{z-index:4;cursor:grabbing;box-shadow:0 0 0 2px #fff,0 4px 10px rgba(0,0,0,.4)}
@@ -567,8 +567,8 @@ div.pt{display:grid;grid-template-columns:minmax(0,1fr) clamp(190px,33%,300px);g
 .pt-bar i{position:relative;display:block;height:1.15em;background:rgba(255,255,255,.08)}
 .pt-bar i::before{content:"";position:absolute;inset:0 auto 0 0;width:var(--v);background:var(--c)}
 .pt-bar b{position:absolute;right:.3em;top:50%;transform:translateY(-50%);font-size:.85em;color:#fff;text-shadow:0 0 2px #000}
-.pt-btns{display:grid;grid-template-columns:1fr 1fr;align-content:end;gap:.5em}
-.pt-btns .fgb.tsb{padding:.4em .5em;line-height:1.1}
+.pt-btns{display:flex;flex-wrap:wrap;gap:.5em}
+.pt-btns .fgb.tsb{flex:1 1 auto;padding:.45em .9em;line-height:1.1;white-space:nowrap}
 .fgb.purple{background:#7A2FD6}
 .pt-pop{width:min(560px,94vw);height:auto}.pt-pop.pt-pw2{width:min(760px,96vw)}
 .pt-ord{display:grid;gap:.15em}
@@ -596,7 +596,7 @@ div.pt{display:grid;grid-template-columns:minmax(0,1fr) clamp(190px,33%,300px);g
   .pt-bars{gap:1px;padding:.25em .45em .35em}
   .pt-bar{grid-template-columns:6.4em minmax(0,1fr);font-size:.74em}.pt-bar i{height:1em}
   .pt-stats h3{padding:.2em .6em;font-size:.72em}
-  .pt-btns{gap:4px}.pt-btns .fgb.tsb{min-height:24px;padding:.2em .4em;font-size:.9em}
+  .pt-btns{gap:4px}.pt-btns .fgb.tsb{min-height:24px;padding:.25em .6em;font-size:.9em}
   .pt-pop .ci-body{max-height:62vh;overflow-y:auto}.pt-or{grid-template-columns:7.5em minmax(0,1fr)}.pt-po{grid-template-columns:7em minmax(0,1fr) minmax(0,1fr)}
 }
 @media (max-height:500px){
@@ -3567,8 +3567,8 @@ function viewPitch() {
   const dots = D.players.map((p) => `<span class="ts-dot p${p.pos} pt-dot" data-k="${p.k}" style="${ptPct(p.x, p.y)}" role="button" aria-label="${esc(p.name)}" aria-pressed="${p.sel}">${p.no}</span>
     ${names ? `<span class="pt-nm" data-nm="${p.k}" style="${ptPct(p.x, p.y)}">${esc(p.name)}</span>` : ''}${p.sel ? `<span class="ts-mk pt-mk" style="${ptPct(p.x, p.y)}" aria-hidden="true"></span>` : ''}`).join('');
   const pitch = `<div class="ts-pitch pt-pitch" aria-label="Formation"><svg viewBox="0 0 400 300" preserveAspectRatio="none" aria-hidden="true">
-      <rect x="1" y="1" width="398" height="298" class="pl"/><path d="M200 1v298" class="pl"/><circle cx="200" cy="150" r="36" class="pl"/>
-      <rect x="1" y="80" width="48" height="140" class="pl"/><rect x="351" y="80" width="48" height="140" class="pl"/>
+      <rect x="1" y="1" width="398" height="298" class="pl"/><path d="M200 1v298" class="pl"/><circle cx="200" cy="150" r="40" class="pl"/>
+      <path d="M1 66h68v167H1M1 111h21v76H1M69 117a40 40 0 0 1 0 66M399 66h-68v167h68M399 111h-21v76h21M331 117a40 40 0 0 0 0 66" class="pl"/>
       ${TS_ZONES.map(([a, b, c, d]) => `<rect x="${a * 4}" y="${c * 3}" width="${(b - a) * 4}" height="${(d - c) * 3}" class="pz"/>`).join('')}</svg>${dots}</div>`;
   const bar = ([k, col]) => { const v = D.bars[k] ?? 0; return `<div class="pt-bar"><span>${k}</span><i style="--v:${Math.max(0, Math.min(100, v))}%;--c:${col}"><b class="num">${v}</b></i></div>`; };
   const on = { porders: D.playerOrders, undoall: D.undoAll, undo: D.undo, last: D.lastMeeting !== -1, deleg: D.delegate };
