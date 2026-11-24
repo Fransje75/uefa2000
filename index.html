@@ -567,8 +567,10 @@ div.pt{display:grid;grid-template-columns:minmax(0,1fr) clamp(190px,33%,300px);g
 .pt-bar i{position:relative;display:block;height:1.15em;background:rgba(255,255,255,.08)}
 .pt-bar i::before{content:"";position:absolute;inset:0 auto 0 0;width:var(--v);background:var(--c)}
 .pt-bar b{position:absolute;right:.3em;top:50%;transform:translateY(-50%);font-size:.85em;color:#fff;text-shadow:0 0 2px #000}
-.pt-btns{display:flex;flex-wrap:wrap;gap:.5em}
-.pt-btns .fgb.tsb{flex:1 1 auto;padding:.45em .9em;line-height:1.1;white-space:nowrap}
+.pt-btns{display:flex;flex-wrap:wrap;align-items:flex-end;gap:.5em}
+.pt-btns .fgb.tsb{flex:0 0 auto;padding:.45em .9em;line-height:1.1;white-space:nowrap}
+.pt-bstack{display:flex;flex-direction:column;gap:.5em}.pt-bstack .fgb.tsb{width:100%}
+.pt-btns [data-ptb=deleg]{margin-left:auto}
 .fgb.purple{background:#7A2FD6}
 .pt-pop{width:min(560px,94vw);height:auto}.pt-pop.pt-pw2{width:min(760px,96vw)}
 .pt-ord{display:grid;gap:.15em}
@@ -596,7 +598,7 @@ div.pt{display:grid;grid-template-columns:minmax(0,1fr) clamp(190px,33%,300px);g
   .pt-bars{gap:1px;padding:.25em .45em .35em}
   .pt-bar{grid-template-columns:6.4em minmax(0,1fr);font-size:.74em}.pt-bar i{height:1em}
   .pt-stats h3{padding:.2em .6em;font-size:.72em}
-  .pt-btns{gap:4px}.pt-btns .fgb.tsb{min-height:24px;padding:.25em .6em;font-size:.9em}
+  .pt-btns{gap:4px}.pt-btns .fgb.tsb{flex:1 1 auto;min-height:24px;padding:.25em .6em;font-size:.9em}.pt-bstack{display:contents}.pt-bstack .fgb.tsb{width:auto}.pt-btns [data-ptb=deleg]{margin-left:0}
   .pt-pop .ci-body{max-height:62vh;overflow-y:auto}.pt-or{grid-template-columns:7.5em minmax(0,1fr)}.pt-po{grid-template-columns:7em minmax(0,1fr) minmax(0,1fr)}
 }
 @media (max-height:500px){
@@ -3144,6 +3146,10 @@ async function todayClick(e) {
 const TS_HEAD = { xi: 'Starting Eleven', subs: 'Substitutes', res: 'Reserves' };
 const TS_TASKS = [['captain', 'Captain'], ['fk', 'Free Kick Taker'], ['ck', 'Corner Kick Taker'], ['penalty', 'Penalty Kick Taker'], ['marshal', 'Defense Marshall']];
 const TS_ATTR = [['Hnd', 'Handling'], ['Tck', 'Tackling'], ['Pas', 'Passing'], ['Drb', 'Dribbling'], ['Hdg', 'Heading'], ['Sht', 'Shooting'], ['Pce', 'Pace'], ['Str', 'Strength'], ['Fit', 'Fitness'], ['Mor', 'Morale']];
+// veldlijnen (Team Selection en Pitch Tactics), nagemeten op het origineel (veld 400x300 = 0x5a92d8): strafschopgebied 0..69 x 66..233,
+// doelgebied 0..22 x 111..187, boog om de stip (x 46, r 40) buiten het strafschopgebied, middencirkel r 40
+const PITCH_LINES = `<rect x="1" y="1" width="398" height="298" class="pl"/><path d="M200 1v298" class="pl"/><circle cx="200" cy="150" r="40" class="pl"/>
+      <path d="M1 66h68v167H1M1 111h21v76H1M69 117a40 40 0 0 1 0 66M399 66h-68v167h68M399 111h-21v76h21M331 117a40 40 0 0 0 0 66" class="pl"/>`;
 const TS_ZONES = [[0, 8.3, 33.3, 66.6], [8.3, 16.6, 33.3, 66.6], [0, 33.3, 0, 33.3], [16.6, 33.3, 33.3, 66.6], [0, 33.3, 66.6, 100], [33.3, 41.6, 0, 33.3], [33.3, 41.6, 66.6, 100], [33.3, 41.6, 33.3, 66.6],
   [41.6, 58.2, 0, 33.3], [41.6, 58.2, 33.3, 66.6], [41.6, 58.2, 66.6, 100], [58.2, 66.6, 33.3, 66.6], [58.2, 100, 0, 33.3], [58.2, 100, 66.6, 100], [66.6, 80, 33.3, 66.6], [80, 100, 33.3, 66.6]];
 const POSL = 'GDMA', roleLine = (r) => (r === 0 ? 0 : r <= 6 ? 1 : r <= 11 ? 2 : 3);
@@ -3183,8 +3189,7 @@ function viewTeamSel() {
   const sec = (k) => `<section class="ts-sec ts-${k}" role="table" aria-label="${TS_HEAD[k]}"><h3>${TS_HEAD[k]}</h3>${k === 'xi' ? head : ''}<div class="ts-body" ${k === 'res' ? 'id="ts-res"' : ''}>${L[k].map((r, i) => tsRow(r, k, i, exp, k === 'xi' ? roleLine(D.slots[i].role) : null, isSel(k, i, r))).join('') || `<div class="ts-row empty" data-l="${k}" data-i="0"></div>`}</div></section>`;
   const task = ([k, t]) => `<section class="ts-sec ts-task" role="table" aria-label="${t}"><h3>${t}</h3>${L[k].map((r, i) => tsRow(r, k, i, false, k === 'fk' ? i + 1 : null, isSel(k, i, r))).join('')}</section>`;
   const pitch = `<div class="ts-pitch" aria-label="Formation"><svg viewBox="0 0 400 300" preserveAspectRatio="none" aria-hidden="true">
-      <rect x="1" y="1" width="398" height="298" class="pl"/><path d="M200 1v298" class="pl"/><circle cx="200" cy="150" r="36" class="pl"/>
-      <rect x="1" y="80" width="48" height="140" class="pl"/><rect x="351" y="80" width="48" height="140" class="pl"/>
+      ${PITCH_LINES}
       ${TS_ZONES.map(([a, b, c, d]) => `<rect x="${a * 4}" y="${c * 3}" width="${(b - a) * 4}" height="${(d - c) * 3}" class="pz"/>`).join('')}</svg>
     ${D.slots.map((s, k) => { const pos = `left:${((s.x - 100) / 4).toFixed(2)}%;top:${((s.y - 4) / 3).toFixed(2)}%`;
       return `<span class="ts-dot p${s.pos}" style="${pos}">${s.no || ''}</span>${k === selXi ? `<span class="ts-mk" style="${pos}" aria-hidden="true"></span>` : ''}`; }).join('')}</div>`;
@@ -3567,12 +3572,12 @@ function viewPitch() {
   const dots = D.players.map((p) => `<span class="ts-dot p${p.pos} pt-dot" data-k="${p.k}" style="${ptPct(p.x, p.y)}" role="button" aria-label="${esc(p.name)}" aria-pressed="${p.sel}">${p.no}</span>
     ${names ? `<span class="pt-nm" data-nm="${p.k}" style="${ptPct(p.x, p.y)}">${esc(p.name)}</span>` : ''}${p.sel ? `<span class="ts-mk pt-mk" style="${ptPct(p.x, p.y)}" aria-hidden="true"></span>` : ''}`).join('');
   const pitch = `<div class="ts-pitch pt-pitch" aria-label="Formation"><svg viewBox="0 0 400 300" preserveAspectRatio="none" aria-hidden="true">
-      <rect x="1" y="1" width="398" height="298" class="pl"/><path d="M200 1v298" class="pl"/><circle cx="200" cy="150" r="40" class="pl"/>
-      <path d="M1 66h68v167H1M1 111h21v76H1M69 117a40 40 0 0 1 0 66M399 66h-68v167h68M399 111h-21v76h21M331 117a40 40 0 0 0 0 66" class="pl"/>
+      ${PITCH_LINES}
       ${TS_ZONES.map(([a, b, c, d]) => `<rect x="${a * 4}" y="${c * 3}" width="${(b - a) * 4}" height="${(d - c) * 3}" class="pz"/>`).join('')}</svg>${dots}</div>`;
   const bar = ([k, col]) => { const v = D.bars[k] ?? 0; return `<div class="pt-bar"><span>${k}</span><i style="--v:${Math.max(0, Math.min(100, v))}%;--c:${col}"><b class="num">${v}</b></i></div>`; };
   const on = { porders: D.playerOrders, undoall: D.undoAll, undo: D.undo, last: D.lastMeeting !== -1, deleg: D.delegate };
-  const btns = PT_BTN.map(([k, l, c, t]) => `<button class="fgb tsb ${c}" data-ptb="${k}" title="${t}" ${on[k] === false ? 'aria-disabled="true"' : ''}>${l}</button>`).join('');
+  const btn = ([k, l, c, t]) => `<button class="fgb tsb ${c}" data-ptb="${k}" title="${t}" ${on[k] === false ? 'aria-disabled="true"' : ''}>${l}</button>`;
+  const btns = `<div class="pt-bstack">${PT_BTN.slice(0, 2).map(btn).join('')}</div>${PT_BTN.slice(2).map(btn).join('')}`;
   return `<div class="pt">
     <div class="ts-top pt-top"><label class="ts-sel"><span>Your Tactics</span><select id="pt-tac">${D.tactics.map((t, i) => `<option value="${t.data}" ${i === D.tacticsSel ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label></div>
     <div class="ts-pw pt-pw">${pitch}</div>
