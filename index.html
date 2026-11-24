@@ -429,6 +429,10 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .gb-prog{position:relative;flex:1;background:rgba(0,0,0,.28);border-radius:.35em;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
 .gb-prog i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--amber),#ffd772);transition:width .2s}
 .gb-prog span{position:relative;display:flex;align-items:center;height:100%;font-size:.72em;padding-left:.4em;color:#2B1D00;font-weight:700}
+.gb-prog.note span{position:absolute;inset:0;overflow:hidden;white-space:nowrap;padding:0 .5em}.gb-prog.note b{font-weight:700;flex:none}
+.gb-prog.mq b{animation:gbmq linear infinite alternate}@keyframes gbmq{0%,15%{transform:none}85%,100%{transform:translateX(var(--mq))}}
+.gb-note.err{background:linear-gradient(90deg,#E0524A,#F08A7E)}.gb-prog.err span{color:#fff}
+.gb-note.wait{background:repeating-linear-gradient(-45deg,var(--amber) 0 10px,#ffd772 10px 20px);background-size:28px 28px;animation:gbwait .8s linear infinite}@keyframes gbwait{to{background-position:28px 0}}
 .gm{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:.5em;background:rgba(0,0,0,.28);border-radius:.45em;padding:.2em .6em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
 .gm-side{flex:1;min-width:0;display:flex;align-items:center;gap:.4em;justify-content:flex-end}
 .gm-side:last-child{flex-direction:row-reverse;justify-content:flex-end}
@@ -554,7 +558,7 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
   .gn{aspect-ratio:auto;height:20px}
   .gf-top{height:36px;padding:3px .6em;gap:.4em}
   .gb-bank{flex-direction:row;align-items:stretch;min-width:0}
-  .gb-prog{width:3.5em}
+  .gb-prog{width:3.5em}.gb-bank{position:relative}.gb-prog.note{position:absolute;left:0;top:0;bottom:0;width:max-content;min-width:100%;max-width:min(30em,62vw);z-index:5;box-shadow:0 4px 14px rgba(0,0,0,.35)}.gb-prog.note span{position:relative}
   .gm{padding:1px .5em}.gm .shirt{width:1.6em;height:1.6em}.gm-txt span{display:none}
   .gm-mid{display:flex;align-items:center;gap:.3em}
   /* lage schermen (iPhone): takenlijsten altijd helemaal in beeld; Last Meeting / Rules / Delegate! onder elkaar rechts naast het veldje, even breed (wens Kevin 24-11) */
@@ -1323,7 +1327,21 @@ function flagHTML(id) {
 const S = { timer: 0, boot: null, tab: 'home', dash: null, squad: null, nats: {}, fixtures: null, table: null, busy: false, sub: 'lineup', lineup: null, sel: null, csub: 'table', msub: 'mail', mails: null, news: null, tr: null, market: null, mf: { scope: 'list', line: -1, maxPrice: 0, maxAge: 0, name: '' }, page: null, fin: null, fper: 'season', fopen: new Set(), staff: null, srole: 0, sp: null, trn: null, stad: null, bank: null, psub: 'first', yo: null, yonats: {} };
 const app = $('#app');
 
-function toast(msg, ms = 3200) { const t = h(`<div class="toast" role="status">${esc(msg)}</div>`).firstChild; document.body.append(t); setTimeout(() => t.remove(), ms); }
+// statusmeldingen: in het spel in het balkje onder het banksaldo (wens Kevin 24-11), daarbuiten (startschermen) de zwarte balk onderaan
+function toast(msg, ms = 3200) {
+  if ($('.gb-prog') && S.busy) { S.notePending = [msg, ms]; return; } // na Continue tonen
+  if ($('.gb-prog')) {
+    const until = Date.now() + Math.max(ms, 1500 + String(msg).length * 55), n = S.note = { msg: String(msg), until, wait: /…$/.test(msg), err: /^(Error|Fout)\b|not possible|niet mogelijk|could not/i.test(msg) };
+    noteDraw(); setTimeout(() => { if (S.note === n) { S.note = null; noteDraw(); } }, until - Date.now()); return;
+  }
+  const t = h(`<div class="toast" role="status">${esc(msg)}</div>`).firstChild; document.body.append(t); setTimeout(() => t.remove(), ms);
+}
+function noteHTML() { const n = S.note; return n ? `<i class="gb-note${n.wait ? ' wait' : ''}${n.err ? ' err' : ''}" style="width:100%"></i><span role="status" title="${esc(n.msg)}"><b>${esc(n.msg)}</b></span>` : ''; }
+function noteDraw() {
+  const pb = $('.gb-prog'); if (!pb || S.busy) return;
+  pb.innerHTML = noteHTML(); pb.classList.toggle('note', !!S.note); pb.classList.toggle('err', !!(S.note && S.note.err));
+  const sp = pb.querySelector('span'), b = sp && sp.firstChild; if (b && b.scrollWidth > sp.clientWidth) { pb.classList.add('mq'); b.style.setProperty('--mq', (sp.clientWidth - b.scrollWidth - 12) + 'px'); b.style.animationDuration = Math.max(3, (b.scrollWidth - sp.clientWidth) / 40 + 2) + 's'; } else pb.classList.remove('mq');
+}
 
 function scoreboard(d, busyText) {
   const last = d && d.last[0];
@@ -2939,7 +2957,7 @@ function gframe(body) {
       <div class="gr-row"><button class="gr go" id="go" title="${CTIP[cm]}" aria-label="${CTIP[cm]}" ${S.busy ? 'aria-disabled="true"' : ''}>${GI(BICON.fwd, 'class="arr"')}${GI(CICON[cm])}</button></div>
     </aside>
     <header class="gf-top">
-      <div class="gb-bank"><div class="gb-amt num">${esc(F.bank || '')}</div><div class="gb-prog">${S.busy ? `<i style="width:${S.busyPct || 4}%"></i><span>${esc(S.busyText || '')}</span>` : ''}</div></div>
+      <div class="gb-bank"><div class="gb-amt num">${esc(F.bank || '')}</div><div class="gb-prog${!S.busy && S.note ? ' note' + (S.note.err ? ' err' : '') : ''}">${S.busy ? `<i style="width:${S.busyPct || 4}%"></i><span>${esc(S.busyText || '')}</span>` : noteHTML()}</div></div>
       <div class="gm">${nm ? `${side(nm.home)}<div class="gm-mid" title="${COMPT[nm.comp]}">${GI(COMPI[nm.comp], 'class="gm-ico"')}<span class="num">${esc(nm.date)}</span></div>${side(nm.away)}` : '<div class="gm-none">No fixture</div>'}</div>
       <div class="gd">${weatherHTML(F.weather)}<span class="gd-date num" aria-live="polite">${esc(S.busy && S.busyText ? S.busyText : F.date || '')}</span></div>
     </header>
@@ -3778,7 +3796,7 @@ async function refreshTab() {
 }
 async function doContinue() {
   if (S.busy) return;
-  S.busy = true; S.busyText = ''; S.busyPct = 4; renderGame();
+  S.busy = true; S.busyText = ''; S.busyPct = 4; S.note = null; renderGame();
   const t0 = Date.now(), tick = setInterval(() => { S.busyPct = Math.min(96, 4 + (Date.now() - t0) / 60); const b = $('.gb-prog i'); if (b) b.style.width = S.busyPct + '%'; }, 200);
   let blocked = false;
   try {
@@ -3789,6 +3807,7 @@ async function doContinue() {
   } catch (e) { toast('Error: ' + e.message); }
   clearInterval(tick); S.busy = false; S.busyText = '';
   await gotoScreen(blocked ? 'tm-sel' : 'today');
+  if (S.notePending) { const [m, ms] = S.notePending; S.notePending = null; toast(m, ms); }
 }
 
 app.addEventListener('change', async (e) => {
