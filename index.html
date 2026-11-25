@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1F4D3A">
 <title>UEFA Manager 2000 — web</title>
 <style>
@@ -482,7 +482,7 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .fs-r.tap{cursor:pointer}.fs-r.tap:hover{background:#F2F5F0}
 .fs-none{padding:.5em .7em;color:var(--muted);font-size:.9em}
 .fm-hd,.fm-r{display:grid;grid-template-columns:1fr 4em 4.5em;gap:.4em;padding:.2em .6em}
-.fm-hd{font-size:.75em;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line)}
+.fm-hd{font-size:.9em;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line)}.fm-hd>span{font-size:.83em}
 .fm-hd span:not(:first-child),.fm-r span:not(:first-child){text-align:right}
 .fm-r{width:100%;border:0;background:none;font:inherit;font-size:.9em;text-align:left;cursor:pointer;color:var(--ink)}
 .fm-r:hover{background:#F2F5F0}
@@ -519,7 +519,7 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .ts-row{display:grid;grid-template-columns:5px 1.9em minmax(0,1fr) 1.7em 2.6em 2.1em;align-items:center;gap:.4em;padding-right:.55em;height:var(--tsrow);border-top:1px solid #EDF0EB;font-size:clamp(9px,calc(var(--tsrow) * .6),15px);
   touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;background:#fff;box-sizing:border-box}
 .ts.exp .ts-row{grid-template-columns:5px 1.9em minmax(9em,1fr) 1.7em 2.6em 2.1em repeat(10,2.15em)}
-.ts-row.ts-h{height:auto;padding-top:.2em;padding-bottom:.2em;font-size:clamp(9px,calc(var(--tsrow) * .44),12px);font-weight:600;color:var(--muted);background:#F2F5F0;cursor:default;border-top:0}
+.ts-row.ts-h>*{font-size:.75em}.ts-row.ts-h{height:auto;padding-top:.2em;padding-bottom:.2em;font-weight:600;color:var(--muted);background:#F2F5F0;cursor:default;border-top:0}
 .ts-row.empty{cursor:default}
 .ts-row{overflow:hidden}
 .ts-row .ci-ec,.ts-ghost .ci-ec{width:.95em;height:1.14em}
@@ -660,7 +660,7 @@ div.pt{display:grid;grid-template-columns:minmax(0,1fr) clamp(190px,33%,300px);g
 .md-sec h3{margin:0;padding:.35em .7em;font:600 .78em/1 var(--body);text-transform:uppercase;letter-spacing:.07em;color:#fff;background:var(--turf)}
 .md-t{display:grid}
 .md-r{display:grid;grid-template-columns:5px minmax(0,1fr) 1.7em 2.6em 2.4em;align-items:center;gap:.4em;padding-right:.5em;min-height:1.75em;border-top:1px solid #EDF0EB;font-size:.88em}
-.md-r.md-h{min-height:0;padding-top:.25em;padding-bottom:.25em;font-size:.72em;font-weight:600;color:var(--muted);background:#F2F5F0;border-top:0}
+.md-r.md-h>*{font-size:.82em}.md-r.md-h{min-height:0;padding-top:.25em;padding-bottom:.25em;font-weight:600;color:var(--muted);background:#F2F5F0;border-top:0}
 .md-r .ts-bar{align-self:stretch}
 .md-r .ci-pos{width:1.35em;height:1.35em;font-size:.72em}.md-r .ci-role{width:2.3em;height:1.15em}
 .md-nm{display:flex;align-items:center;gap:.35em;min-width:0}.md-nm>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
@@ -761,7 +761,7 @@ div.pt{display:grid;grid-template-columns:minmax(0,1fr) clamp(190px,33%,300px);g
 .pd-t{display:grid;overflow-y:auto;min-height:0;flex:1;font-size:.86em;align-content:start;grid-auto-rows:max-content;font-feature-settings:'calt' 0}
 .pd-tr{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);align-items:center;gap:.3em;padding:0 .5em;min-height:1.8em;border-top:1px solid #EDF0EB}
 .pd-tr span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.pd-th{font-size:.82em;font-weight:600;color:var(--muted);background:#F2F5F0;border-top:0;position:sticky;top:0}
+.pd-th>*{font-size:.82em}.pd-th{font-weight:600;color:var(--muted);background:#F2F5F0;border-top:0;position:sticky;top:0}
 .pd-mh .pd-tr{grid-template-columns:6.6em minmax(5em,1.4fr) repeat(10,minmax(0,1fr));grid-auto-flow:row}
 .pd-mh .pd-tr span:nth-child(n+3){text-align:center}
 .pd-ih .pd-tr{grid-template-columns:5em 5em minmax(0,1fr) 5em;grid-auto-flow:row}
@@ -844,6 +844,18 @@ div.pt{display:grid;grid-template-columns:minmax(0,1fr) clamp(190px,33%,300px);g
 .btn.red{background:#D2362E;color:#fff}.btn[disabled]{opacity:.4}
 @media (max-width:640px){.sv-b{grid-template-columns:1fr}}
 @media (max-height:500px){.sv-d{gap:.3em}.sv-d .ci-f b{min-height:1.75em;padding:.2em .55em}.sv-3 span{grid-template-columns:auto 1fr;align-items:center;gap:.35em}.sv-3 i{font-size:.72em}}
+/* eigen schermtoetsenbord (alleen touchscreens; wens Kevin 25-11) */
+html{touch-action:pan-x pan-y}
+.okb{position:fixed;left:0;right:0;bottom:0;z-index:200;background:#17382B;padding:6px max(6px,var(--sl,0px)) max(6px,env(safe-area-inset-bottom)) max(6px,var(--sr,0px));box-shadow:0 -4px 14px rgba(0,0,0,.35);
+  display:flex;flex-direction:column;gap:5px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
+.okb[hidden]{display:none}
+.okb-r{display:flex;gap:5px;justify-content:center}
+.okb button{flex:1 1 0;max-width:4.2em;height:clamp(32px,8.6vh,46px);border:0;border-radius:7px;background:#F4F7F2;color:#10251B;font:600 clamp(15px,2.6vh,20px)/1 var(--body);box-shadow:0 2px 0 rgba(0,0,0,.35);padding:0;cursor:pointer}
+.okb button.w{max-width:none;flex:1.6 1 0;background:#B9C7BE}.okb button.sp{flex:5 1 0;max-width:none}
+.okb button.ok{background:#D63A2F;color:#fff}.okb button.on{background:#FFB627}.okb button.lk{background:#FFB627;box-shadow:inset 0 0 0 2px #10251B}
+.okb button:active,.okb button.dn{transform:translateY(1px);filter:brightness(.88)}
+html.kb-open .ci-back{padding-bottom:calc(var(--kbh,0px) + 8px)}
+html.kb-open body{padding-bottom:var(--kbh,0px)}
 </style>
 </head>
 <body>
@@ -1246,6 +1258,92 @@ function gunzipSync(u8) {
 // ------------------------------------------------------------ infrastructuur
 const $ = (s, el = document) => el.querySelector(s);
 const h = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content; };
+// ---- Eigen schermtoetsenbord (wens Kevin 25-11): alleen op touchscreens; het toetsenbord van het toestel blijft weg (inputmode="none").
+// Soorten: name = letters, spatie, punt, shift (managernaam); file = ook cijfers en streepje (Save Game / Save Tactics); num = cijfers;
+// dec = cijfers en punt. Altijd backspace en een rode OK. De soort komt uit data-kb, anders uit het oorspronkelijke inputmode.
+const KB_TOUCH = (() => { try { return matchMedia('(hover: none) and (pointer: coarse)').matches; } catch (e) { return false; } })();
+const KB = { el: null, input: null, kind: '', shift: 0, start: '', rep: 0 };
+function kbKind(el) {
+  if (el.dataset.kb) return el.dataset.kb;
+  const m = (el.getAttribute('inputmode') || '').toLowerCase();
+  return m === 'numeric' || el.type === 'number' ? 'num' : m === 'decimal' ? 'dec' : 'name';
+}
+function kbPrep(root) {
+  if (!KB_TOUCH || !root.querySelectorAll) return;
+  const list = root.matches && root.matches('input,textarea') ? [root] : root.querySelectorAll('input,textarea');
+  for (const el of list) {
+    if (el.dataset.kbk || (el.type && !['text', 'number', 'search', 'textarea'].includes(el.type))) continue;
+    el.dataset.kbk = kbKind(el); el.setAttribute('inputmode', 'none'); el.setAttribute('autocomplete', 'off'); el.setAttribute('autocorrect', 'off'); el.setAttribute('autocapitalize', 'off');
+  }
+}
+function kbRows(kind) {
+  const L = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+  if (kind === 'num' || kind === 'dec') return [[...'1234567890'.split(''), ...(kind === 'dec' ? ['.'] : []), 'BS', 'OK']];
+  const up = KB.shift ? (c) => c.toUpperCase() : (c) => c;
+  const rows = [L[0].split('').map(up), L[1].split('').map(up), ['SH', ...L[2].split('').map(up), 'BS'], ['SP', '.', ...(kind === 'file' ? ['-'] : []), 'OK']];
+  if (kind === 'file') rows.unshift('1234567890'.split(''));
+  return rows;
+}
+function kbDraw() {
+  const lab = { BS: '⌫', OK: '✓', SH: '⇧', SP: 'space' }, cls = { BS: 'w', OK: 'w ok', SH: 'w' + (KB.shift === 2 ? ' lk' : KB.shift ? ' on' : ''), SP: 'sp' };
+  KB.el.innerHTML = kbRows(KB.kind).map((r) => `<div class="okb-r">${r.map((k) => `<button type="button" tabindex="-1" data-k="${esc(k)}" class="${cls[k] || ''}" aria-label="${k === 'SP' ? 'Space' : k === 'BS' ? 'Backspace' : k === 'SH' ? 'Shift' : k === 'OK' ? 'Done' : esc(k)}">${esc(lab[k] || k)}</button>`).join('')}</div>`).join('');
+  const hgt = KB.el.offsetHeight; document.documentElement.style.setProperty('--kbh', hgt + 'px');
+}
+function kbAutoShift() { // hoofdletter aan het begin en na een spatie of punt (namen)
+  const el = KB.input; if (!el || KB.kind !== 'name' || KB.shift === 2) return;
+  let a = 0; try { a = el.selectionStart ?? el.value.length; } catch (e) { a = el.value.length; }
+  KB.shift = a === 0 || /[ .]$/.test(el.value.slice(0, a)) ? 1 : 0;
+}
+function kbEdit(ins, del) {
+  const el = KB.input; if (!el) return;
+  const v = el.value; let a, b; try { a = el.selectionStart; b = el.selectionEnd; } catch (e) { a = b = null; }
+  if (a == null) a = b = v.length;
+  let nv, c;
+  if (del) { if (a === b && a === 0) return; nv = a !== b ? v.slice(0, a) + v.slice(b) : v.slice(0, a - 1) + v.slice(b); c = a !== b ? a : a - 1; }
+  else { const max = el.maxLength > 0 ? el.maxLength : 1e9; if (v.length - (b - a) + ins.length > max) return; nv = v.slice(0, a) + ins + v.slice(b); c = a + ins.length; }
+  el.value = nv; try { el.setSelectionRange(c, c); } catch (e) {}
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+}
+function kbPress(k) {
+  if (k === 'OK') { const el = KB.input; if (el) el.blur(); return; }
+  if (k === 'SH') { KB.shift = KB.shift ? (KB.shift === 1 && Date.now() - (KB.shT || 0) < 350 ? 2 : 0) : 1; KB.shT = Date.now(); kbDraw(); return; }
+  if (k === 'BS') kbEdit('', true); else kbEdit(k === 'SP' ? ' ' : k, false);
+  if (KB.shift === 1 && k !== 'BS') KB.shift = 0;
+  if (KB.kind === 'name') kbAutoShift();
+  if (KB.kind === 'name' || KB.kind === 'file') kbDraw();
+}
+function kbShow(el) {
+  if (!KB.el) {
+    KB.el = h('<div class="okb" role="group" aria-label="Keyboard" hidden></div>').firstChild; document.body.append(KB.el);
+    const stop = () => { clearTimeout(KB.rep); clearInterval(KB.rep); };
+    KB.el.addEventListener('pointerdown', (e) => { e.preventDefault(); const b = e.target.closest('[data-k]'); if (!b) return; b.classList.add('dn'); kbPress(b.dataset.k);
+      if (b.dataset.k === 'BS') { stop(); KB.rep = setTimeout(() => { KB.rep = setInterval(() => kbPress('BS'), 70); }, 400); } });
+    for (const t of ['pointerup', 'pointercancel', 'pointerleave']) KB.el.addEventListener(t, (e) => { stop(); KB.el.querySelectorAll('.dn').forEach((x) => x.classList.remove('dn')); });
+    KB.el.addEventListener('mousedown', (e) => e.preventDefault()); KB.el.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+  }
+  KB.input = el; KB.kind = el.dataset.kbk; KB.start = el.value; KB.shift = 0; kbAutoShift();
+  KB.el.hidden = false; kbDraw(); document.documentElement.classList.add('kb-open');
+  requestAnimationFrame(() => { const r = el.getBoundingClientRect(), top = innerHeight - KB.el.offsetHeight;
+    if (r.bottom > top - 6 || r.top < 0) el.scrollIntoView({ block: 'center' }); });
+}
+function kbHide() {
+  const el = KB.input; KB.input = null; if (KB.el) KB.el.hidden = true;
+  document.documentElement.classList.remove('kb-open'); document.documentElement.style.removeProperty('--kbh');
+  if (el && el.value !== KB.start) el.dispatchEvent(new Event('change', { bubbles: true }));
+}
+if (KB_TOUCH) {
+  new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1) kbPrep(n); }).observe(document.documentElement, { childList: true, subtree: true });
+  addEventListener('DOMContentLoaded', () => kbPrep(document));
+  // alleen na een tik op het veld (niet bij focus() van de app zelf, bv. de managernaam bij het openen); een tik op een veld dat al focus heeft opent het ook
+  const kbOk = (el) => el && el.dataset && !el.disabled && !el.readOnly && (kbPrep(el), !!el.dataset.kbk);
+  document.addEventListener('pointerdown', (e) => { const el = e.target.closest && e.target.closest('input,textarea'); if (!kbOk(el)) return;
+    KB.tap = { el, t: Date.now() }; if (document.activeElement === el && KB.input !== el) kbShow(el); }, true);
+  document.addEventListener('focusin', (e) => { const el = e.target; if (kbOk(el) && KB.tap && KB.tap.el === el && Date.now() - KB.tap.t < 1500) kbShow(el); });
+  document.addEventListener('focusout', (e) => { if (e.target === KB.input) setTimeout(() => { if (document.activeElement !== KB.input || !KB.input) kbHide(); }, 0); });
+  // pinch-zoom uit: viewport user-scalable=no (Android), html{touch-action:pan-x pan-y} (ook dubbeltik-zoom) en gesture-events (Safari)
+  for (const t of ['gesturestart', 'gesturechange', 'gestureend']) document.addEventListener(t, (e) => e.preventDefault(), { passive: false });
+  document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+}
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const MONTHS = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
 const fmtDate = (d) => d ? `${d[0]} ${MONTHS[d[1] - 1]} ${d[2]}` : '';
@@ -3773,7 +3871,7 @@ async function ptSaveTactics() {
   let list = R.list, pick = -1;
   const back = h(`<div class="ci-back" role="dialog" aria-modal="true" aria-label="Save Tactics"><div class="ci pt-sv">
     <header class="ci-hd"><h2><span>Save Tactics</span></h2><button class="ci-nav mf-help" data-help aria-label="Help">?</button></header>
-    <div class="ci-body"><label class="pt-fn"><span>Filename</span><input id="pt-fn" maxlength="39" autocomplete="off" spellcheck="false"></label>
+    <div class="ci-body"><label class="pt-fn"><span>Filename</span><input id="pt-fn" data-kb="file" maxlength="39" autocomplete="off" spellcheck="false"></label>
       <div class="md-t pt-svl" role="table"><div class="md-r md-h" role="row"><span>Date</span><span>Filename</span></div><div class="pt-svb"></div></div></div>
     <footer class="mf-ft pt-ft"><button class="btn red" data-del>Delete</button><span class="sp"></span>${RED_OK()}${RED_X()}</footer></div></div>`).firstChild;
   const fn = back.querySelector('#pt-fn');
@@ -4235,7 +4333,7 @@ async function saveLoadPopup(mode, onCancel) {
     const m = sel ? sel.meta : null, f = m && m.dateFmt;
     back.firstChild.innerHTML = `<header class="ci-hd"><h2><span>${load ? 'Load Game' : 'Save Game'}</span></h2><button class="ci-nav mf-help" data-help aria-label="Help">?</button></header>
       <div class="ci-body sv-b">
-        <div class="sv-l">${load ? '' : `<label class="sv-fn"><span class="k">Filename</span><input id="sv-name" maxlength="30" value="${esc(name)}" autocomplete="off" spellcheck="false"></label>`}
+        <div class="sv-l">${load ? '' : `<label class="sv-fn"><span class="k">Filename</span><input id="sv-name" data-kb="file" maxlength="30" value="${esc(name)}" autocomplete="off" spellcheck="false"></label>`}
           <div class="sv-t" role="listbox" aria-label="Saved games"><div class="sv-r sv-h"><span>Date</span><span>Filename</span></div>
           ${saves.length ? saves.map((x) => `<button class="sv-r" role="option" data-key="${x.key}" aria-selected="${x === sel}"><span class="num">${fmtUpd(x.meta.saved, x.meta.dateFmt)}</span><span>${esc(saveName(x))}</span></button>`).join('') : '<div class="sv-none">No saved games yet.</div>'}</div></div>
         <div class="sv-d">${m ? `
