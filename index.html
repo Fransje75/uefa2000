@@ -348,6 +348,7 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .ci-pos{position:relative}.vgl{display:block;flex:none}.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .ci-pos{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;font:700 11px/1 var(--display);color:#1A1A1A;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35),inset 0 2px 2px rgba(255,255,255,.35)}
 .ci-pos.p0{background:#52CE29}.ci-pos.p1{background:#FFCE00}.ci-pos.p2{background:#296BDE}.ci-pos.p3{background:#FF4A63}
+.ci-pos.vb{background:none;box-shadow:none}.vbs{display:block;width:100%;height:100%;overflow:visible}
 .ci-role{width:36px;height:18px;display:block}
 .ci-rolet{font-size:.7em;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ci-ec{flex:none;width:15px;height:18px;display:inline-block;vertical-align:middle}
@@ -545,6 +546,7 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.45),inset 0 2px 2px rgba(255,255,255,.35)}
 .ts-mk{position:absolute;transform:translate(-50%,-50%);width:calc(var(--cq,1cqw) * 11);height:calc(var(--cq,1cqw) * 11);pointer-events:none;background:linear-gradient(#FFD54A,#FFD54A) 0 0/32% 2px no-repeat,linear-gradient(#FFD54A,#FFD54A) 0 0/2px 32% no-repeat,linear-gradient(#FFD54A,#FFD54A) 0 100%/32% 2px no-repeat,linear-gradient(#FFD54A,#FFD54A) 0 100%/2px 32% no-repeat,linear-gradient(#FFD54A,#FFD54A) 100% 0/32% 2px no-repeat,linear-gradient(#FFD54A,#FFD54A) 100% 0/2px 32% no-repeat,linear-gradient(#FFD54A,#FFD54A) 100% 100%/32% 2px no-repeat,linear-gradient(#FFD54A,#FFD54A) 100% 100%/2px 32% no-repeat}
 .ts-dot.p0{background:#52CE29}.ts-dot.p1{background:#FFCE00}.ts-dot.p2{background:#296BDE}.ts-dot.p3{background:#FF4A63}
+.ts-dot.vb{background:none;box-shadow:none}
 .ts-btns{display:flex;gap:.45em;justify-content:flex-end;flex-wrap:wrap}
 .ts-top .ts-btns{margin-left:auto}
 .fgb.tsb{opacity:1;min-height:max(2.2em,32px);padding:.4em 1em}.fgb.green{background:#2E8B57}
@@ -1076,7 +1078,21 @@ const VEC = (() => {
     const w = x1 - x0, s = `<svg class="vgl" viewBox="${x0.toFixed(1)} 0 ${w.toFixed(1)} 100" style="width:${(hEm * w / 100).toFixed(3)}em;height:${hEm}em" fill="currentColor" aria-hidden="true" focusable="false">${d}<\/svg>`;
     cache.set(k, s); return s;
   }
-  return { flag, shirt, role, globe, glyphs, hasGlyph: (c) => !!GL[c], POSCOL };
+  // heel positiebolletje als één SVG (cirkel + rand + glans + teken), zodat cirkel en teken altijd samen op dezelfde (sub)pixels vallen
+  // (wens Kevin 25-11: los getekende letters schoven op schermen met 1x-pixels nog een halve pixel t.o.v. de CSS-cirkel, en Safari sneed de
+  // randpixels van de letters af). ratio = hoofdletterhoogte / diameter.
+  function badge(str, line, ratio = 0.4) {
+    str = String(str ?? ''); const k = 'bd:' + str + ':' + line + ':' + ratio; if (cache.has(k)) return cache.get(k);
+    let pen = 0, x0 = null, x1 = 0, d = '';
+    for (const ch of str) { const g = GL[ch]; if (!g) continue; const x = pen + g[1];
+      if (x0 === null) x0 = x; x1 = x + g[2]; d += `<path transform="translate(${x.toFixed(1)} 0)" d="${g[3]}"/>`; pen += g[0] - 6; }
+    const sc = ratio * 20 / 100, tx = x0 === null ? 0 : 10 - (x0 + (x1 - x0) / 2) * sc, ty = 10 - 50 * sc;
+    const svg = `<svg class="vbs" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="9.5" fill="${POSCOL[line] || '#999'}" stroke="rgba(0,0,0,.4)" stroke-width="1"/>`
+      + `<path d="M4.4 6A7.6 7.6 0 0 1 15.6 6" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="1.6" stroke-linecap="round"/>`
+      + `<g fill="#1A1A1A" transform="translate(${tx.toFixed(3)} ${ty.toFixed(3)}) scale(${sc.toFixed(4)})">${d}<\/g><\/svg>`;
+    cache.set(k, svg); return svg;
+  }
+  return { flag, shirt, role, globe, glyphs, badge, hasGlyph: (c) => !!GL[c], POSCOL };
 })();
 
 // Inflate/deflate in gewone JS, voor browsers zonder DecompressionStream/CompressionStream (Safari < 16.4, bv. iPad Air 2 met iPadOS 15).
@@ -3186,7 +3202,10 @@ const PITCH_LINES = `<rect x="1" y="1" width="398" height="298" class="pl"/><pat
 const TS_ZONES = [[0, 8.3, 33.3, 66.6], [8.3, 16.6, 33.3, 66.6], [0, 33.3, 0, 33.3], [16.6, 33.3, 33.3, 66.6], [0, 33.3, 66.6, 100], [33.3, 41.6, 0, 33.3], [33.3, 41.6, 66.6, 100], [33.3, 41.6, 33.3, 66.6],
   [41.6, 58.2, 0, 33.3], [41.6, 58.2, 33.3, 66.6], [41.6, 58.2, 66.6, 100], [58.2, 66.6, 33.3, 66.6], [58.2, 100, 0, 33.3], [58.2, 100, 66.6, 100], [66.6, 80, 33.3, 66.6], [80, 100, 33.3, 66.6]];
 // letters/cijfers in de bolletjes als vector (VEC.glyphs), met de tekst onzichtbaar erbij voor schermlezers; onbekende tekens als gewone tekst
-const glyHTML = (t) => { t = String(t ?? ''); return t && [...t].every((c) => VEC.hasGlyph(c)) ? VEC.glyphs(t) + `<span class="vh">${esc(t)}</span>` : esc(t); };
+const glyOK = (t) => { t = String(t ?? ''); return !!t && [...t].every((c) => VEC.hasGlyph(c)); };
+// heel bolletje als SVG (VEC.badge: cirkel + teken samen, dus altijd samen op dezelfde pixels); de span krijgt dan klasse vb (geen CSS-cirkel)
+const glyHTML = (t, line, ratio) => (glyOK(t) ? VEC.badge(t, line, ratio) + `<span class="vh">${esc(t)}</span>` : esc(t ?? ''));
+const vbc = (t) => (glyOK(t) ? ' vb' : '');
 const POSL = 'GDMA', roleLine = (r) => (r === 0 ? 0 : r <= 6 ? 1 : r <= 11 ? 2 : 3);
 // pictogrammen achter de naam (0x4589b0), eigen vectorversies; het non-EC-balletje uit GFx zoals bij Club Info
 const TS_IC = {
@@ -3212,7 +3231,7 @@ function tsRow(r, list, i, exp, bar, sel) {
   if (!r) return `<div class="ts-row empty" data-l="${list}" data-i="${i}" role="row">${b}<span class="ts-no"></span><span class="ts-nm"></span><span></span><span></span><span></span>${exp ? '<span></span>'.repeat(10) : ''}</div>`;
   return `<div class="ts-row ${sel ? 'sel' : ''}" data-l="${list}" data-i="${i}" data-p="${r.id}" role="row" ${sel ? 'aria-selected="true"' : ''}>${b}<span class="ts-no num">${esc(r.no)}</span>
     <span class="ts-nm"><span>${esc(r.name)}</span>${r.icons.map(tsIcon).join('')}${r.foreign ? flagHTML(r.nat) : ''}</span>
-    <span class="ts-c"><span class="ci-pos p${r.pos}" title="${['Goalkeeper', 'Defender', 'Midfielder', 'Attacker'][r.pos]}">${glyHTML(POSL[r.pos])}</span></span>
+    <span class="ts-c"><span class="ci-pos p${r.pos}${vbc(POSL[r.pos])}" title="${['Goalkeeper', 'Defender', 'Midfielder', 'Attacker'][r.pos]}">${glyHTML(POSL[r.pos], r.pos)}</span></span>
     <span class="ts-c" data-rolecell><img class="ci-role" src="${VEC.role(r.role)}" alt="" aria-hidden="true"></span>
     ${rtgHTML(r.rtg, 'ts-n')}${exp ? r.attrs.map((a) => `<span class="ts-n num">${a}</span>`).join('') : ''}</div>`;
 }
@@ -3227,7 +3246,7 @@ function viewTeamSel() {
       ${PITCH_LINES}
       ${TS_ZONES.map(([a, b, c, d]) => `<rect x="${a * 4}" y="${c * 3}" width="${(b - a) * 4}" height="${(d - c) * 3}" class="pz"/>`).join('')}</svg>
     ${D.slots.map((s, k) => { const pos = `left:${((s.x - 100) / 4).toFixed(2)}%;top:${((s.y - 4) / 3).toFixed(2)}%`;
-      return `<span class="ts-dot p${s.pos}" style="${pos}">${glyHTML(s.no || '')}</span>${k === selXi ? `<span class="ts-mk" style="${pos}" aria-hidden="true"></span>` : ''}`; }).join('')}</div>`;
+      return `<span class="ts-dot p${s.pos}${vbc(s.no)}" style="${pos}">${glyHTML(s.no || '', s.pos, 0.36)}</span>${k === selXi ? `<span class="ts-mk" style="${pos}" aria-hidden="true"></span>` : ''}`; }).join('')}</div>`;
   const btns = `<div class="ts-btns"><button class="fgb tsb green" data-tsb="last" ${D.lastMeeting === -1 ? 'aria-disabled="true"' : ''} title="View last meeting between teams">Last Meeting</button>
     <button class="fgb tsb green" data-tsb="rules" title="Assistance on match rules">Rules</button>
     <button class="fgb tsb red" data-tsb="deleg" ${D.canDelegate ? '' : 'aria-disabled="true"'} aria-pressed="${!!D.delegate}" title="Assistance on team selection">Delegate!</button></div>`;
@@ -3409,7 +3428,7 @@ async function playerDetails(p, order = [p], tab = 'status', onClose = null) {
     const btnHTML = all.map((b) => `<button class="btn pd-btn${b.id >= 0x2ee && b.id <= 0x2f1 ? ' acc' : ''}" data-pb="${b.id}" style="grid-row:${rowsN - Math.floor(b.slot / 5)};grid-column:${b.slot % 5 + 1}" ${b.ready ? '' : 'disabled title="Not yet available"'}>${esc(b.label)}</button>`).join('');
     back.firstChild.innerHTML = `<header class="ci-hd pd-hd">
         <button class="ci-nav" data-pv ${i > 0 ? '' : 'disabled'} aria-label="Previous player">◀</button><button class="ci-nav" data-nx ${i >= 0 && i < order.length - 1 ? '' : 'disabled'} aria-label="Next player">▶</button>
-        <h2><span>${v(D.title)}</span></h2><span class="pd-pos"><span class="ci-pos p${D.pos}">${glyHTML(POSL[D.pos])}</span>${v(D.posText)}</span>
+        <h2><span>${v(D.title)}</span></h2><span class="pd-pos"><span class="ci-pos p${D.pos}${vbc(POSL[D.pos])}">${glyHTML(POSL[D.pos], D.pos)}</span>${v(D.posText)}</span>
         <div class="ci-tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" data-tab="${k}" aria-selected="${tab === k}" ${k !== 'status' && D.unknown ? 'disabled' : ''}>${l}</button>`).join('')}</div>
         <button class="ci-nav mf-help" data-help aria-label="Help">?</button></header>
       <div class="ci-body pd-b">${body()}</div>
@@ -3541,7 +3560,7 @@ async function matchDetails(match) {
   const rgb = (c) => `rgb(${c[0]},${c[1]},${c[2]})`;
   const team = (title, rows) => `<section class="md-sec"><h3>${esc(title)}</h3><div class="md-t" role="table"><div class="md-r md-h" role="row"><i></i><span>Name</span><span>Pos</span><span>Role</span><span>Rtg</span></div>
     ${rows.map((r) => `<div class="md-r" role="row"><i class="ts-bar b${roleLine(r.role)}" aria-hidden="true"></i><span class="md-nm"><span>${esc(r.name)}</span>${r.foreign ? flagHTML(r.nat) : ''}</span>
-      <span class="ts-c"><span class="ci-pos p${r.pos}" title="${['Goalkeeper', 'Defender', 'Midfielder', 'Attacker'][r.pos] || ''}">${glyHTML(POSL[r.pos] || '')}</span></span>
+      <span class="ts-c"><span class="ci-pos p${r.pos}${vbc(POSL[r.pos])}" title="${['Goalkeeper', 'Defender', 'Midfielder', 'Attacker'][r.pos] || ''}">${glyHTML(POSL[r.pos] || '', r.pos)}</span></span>
       <span class="ts-c"><img class="ci-role" src="${VEC.role(r.role)}" alt="" aria-hidden="true"></span>
       <span class="md-rtg num" style="--v:${Math.max(0, Math.min(100, r.rtg))}%" aria-label="Rating ${r.rtg}">${r.rtg}</span></div>`).join('')}</div></section>`;
   const evs = (title, list) => `<section class="md-sec md-ev"><h3>${esc(title)}</h3><div class="md-t" role="table"><div class="md-r md-h" role="row"><span>Min</span><span>Event</span></div>
@@ -3604,7 +3623,7 @@ const ptPct = (x, y) => `left:${((x - 100) / 4).toFixed(2)}%;top:${((y - 4) / 3)
 function viewPitch() {
   const P = S.pt; if (!P || !P.data) return '<div class="ft-wait">Loading…</div>';
   const D = P.data, names = !OPT.pitch || OPT.pitch[0] !== 0;
-  const dots = D.players.map((p) => `<span class="ts-dot p${p.pos} pt-dot" data-k="${p.k}" style="${ptPct(p.x, p.y)}" role="button" aria-label="${esc(p.name)}" aria-pressed="${p.sel}">${glyHTML(p.no)}</span>
+  const dots = D.players.map((p) => `<span class="ts-dot p${p.pos} pt-dot${vbc(p.no)}" data-k="${p.k}" style="${ptPct(p.x, p.y)}" role="button" aria-label="${esc(p.name)}" aria-pressed="${p.sel}">${glyHTML(p.no, p.pos, 0.36)}</span>
     ${names ? `<span class="pt-nm" data-nm="${p.k}" style="${ptPct(p.x, p.y)}">${esc(p.name)}</span>` : ''}${p.sel ? `<span class="ts-mk pt-mk" style="${ptPct(p.x, p.y)}" aria-hidden="true"></span>` : ''}`).join('');
   const pitch = `<div class="ts-pitch pt-pitch" aria-label="Formation"><svg viewBox="0 0 400 300" preserveAspectRatio="none" aria-hidden="true">
       ${PITCH_LINES}
@@ -4483,7 +4502,7 @@ function setupView(msg) {
 // Club Info (popup 0x4c8c70): tabs General and Players, arrows go to the previous/next club of the list (0x4c9360), OK closes
 // icnPos.bmp als scherpe CSS-cirkel in dezelfde kleuren (VEC.POSCOL), met de positieletter (0x8a)
 function posIcon(line, lb) {
-  return `<span class="ci-pos p${line}" title="${esc(lb.pos[line] || '')}">${glyHTML(lb.posShort[line] || '')}</span>`;
+  return `<span class="ci-pos p${line}${vbc(lb.posShort[line])}" title="${esc(lb.pos[line] || '')}">${glyHTML(lb.posShort[line] || '', line)}</span>`;
 }
 // Role.bmp als vectorveldje (VEC.role), stip op dezelfde plek
 function roleIcon(role, lb) {
