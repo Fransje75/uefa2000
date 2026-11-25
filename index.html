@@ -345,7 +345,7 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .ci-ph>span{font-size:.78em;font-weight:600;color:var(--muted)}
 .ci-pn{display:flex;align-items:center;gap:.45em;min-width:0;padding-right:1.4em}
 .ci-pn>span:first-child{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ci-pos,.ts-dot{box-sizing:border-box;padding-top:max(0em,calc(var(--capdy,0em) * 2));padding-bottom:max(0em,calc(var(--capdy,0em) * -2))}
+.ci-pos{position:relative}.vgl{display:block;flex:none}.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .ci-pos{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;font:700 11px/1 var(--display);color:#1A1A1A;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35),inset 0 2px 2px rgba(255,255,255,.35)}
 .ci-pos.p0{background:#52CE29}.ci-pos.p1{background:#FFCE00}.ci-pos.p2{background:#296BDE}.ci-pos.p3{background:#FF4A63}
 .ci-role{width:36px;height:18px;display:block}
@@ -538,7 +538,7 @@ select:focus,input[inputmode=numeric]:focus{border-color:var(--turf);outline:non
 .ts-pw{min-height:0;min-width:0;display:grid;place-items:center;container-type:size}
 .ts-pitch{position:relative;width:var(--pwW,min(100cqw,calc(100cqh * 4 / 3)));aspect-ratio:4/3;container-type:inline-size;border-radius:.4em;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);
   background:repeating-linear-gradient(90deg,#3F8F3A 0 6.25%,#4A9B43 6.25% 12.5%)}
-.ts-pitch svg{position:absolute;inset:0;width:100%;height:100%}
+.ts-pitch>svg{position:absolute;inset:0;width:100%;height:100%}
 .ts-pitch .pl{fill:none;stroke:rgba(255,255,255,.85);stroke-width:1.4;vector-effect:non-scaling-stroke}
 .ts-pitch .pz{fill:none;stroke:#E8D84A;stroke-width:1;vector-effect:non-scaling-stroke;opacity:.8}
 .ts-dot{position:absolute;transform:translate(-50%,-50%);width:calc(var(--cq,1cqw) * 7);height:calc(var(--cq,1cqw) * 7);border-radius:50%;display:grid;place-items:center;font:700 calc(var(--cq,1cqw) * 3.4)/1 var(--display);color:#1A1A1A;
@@ -1045,7 +1045,38 @@ const VEC = (() => {
       + `<circle cx="10" cy="12" r="8.6" fill="none" stroke="#0E2F55" stroke-width=".8"/><\/svg>`);
     cache.set(k, url); return url;
   }
-  return { flag, shirt, role, globe, POSCOL };
+  // Letters en cijfers in de positiebolletjes als vector (wens Kevin 25-11): op elk toestel precies in het midden, los van het lettertype.
+  // Omtrekken uit Roboto Condensed Bold (Roboto, wdth 75 / wght 700): Copyright 2011 The Roboto Project Authors
+  // (https://github.com/googlefonts/roboto-classic), SIL Open Font License 1.1 (https://openfontlicense.org).
+  // Per teken [voortgang, linker zijpeiling, inktbreedte, pad]; hoofdletterhoogte = 100, bovenkant hoofdletter y = 0, pad begint bij de inkt (x = 0).
+  const GL = {
+    'G': [82.3, 6.6, 69.4, 'M69.4 47.5V88.7Q67.3 90.9 63.2 93.9Q59.1 96.9 52.6 99.1Q46 101.4 36.6 101.4Q28.3 101.4 21.6 98.8Q14.8 96.2 10 90.8Q5.1 85.5 2.6 77.5Q0 69.5 0 58.5V41.5Q0 30.6 2.4 22.6Q4.9 14.5 9.5 9.1Q14.2 3.8 20.7 1.2Q27.2 -1.4 35.4 -1.4Q46.7 -1.4 53.9 2.3Q61.1 6.1 64.9 13.5Q68.6 20.9 69.4 31.7H50Q49.4 25.4 47.8 21.8Q46.3 18.2 43.4 16.7Q40.5 15.2 35.9 15.2Q31.9 15.2 28.9 16.6Q25.9 18 24 21.2Q22 24.3 21 29.3Q20.1 34.2 20.1 41.4V58.5Q20.1 65.6 21.2 70.6Q22.2 75.6 24.4 78.8Q26.6 81.9 29.9 83.3Q33.3 84.7 37.7 84.7Q41.4 84.7 43.6 84Q45.8 83.3 47.2 82.4Q48.5 81.5 49.4 81V62.6H35V47.5Z'],
+    'D': [79.5, 8.1, 64.9, 'M26.1 100H8.5L8.6 83.4H26.1Q33.4 83.4 37.5 80.8Q41.5 78.2 43.2 72.6Q44.9 66.9 44.9 57.8V42.2Q44.9 35.3 44 30.4Q43.1 25.5 40.9 22.5Q38.8 19.5 35.3 18.1Q31.7 16.7 26.4 16.7H8.1V0H26.4Q35.1 0 42.1 2.8Q49.2 5.6 54.3 11Q59.4 16.4 62.1 24.3Q64.9 32.2 64.9 42.3V57.8Q64.9 67.9 62.1 75.7Q59.4 83.6 54.3 89Q49.2 94.4 42.1 97.2Q35 100 26.1 100ZM20.1 0V100H0V0Z'],
+    'M': [106.7, 8.1, 90.4, 'M7.2 0H24.8L45.2 68.4L65.5 0H81.2L52.7 100H37.7ZM0 0H16.9L19.4 66V100H0ZM73.4 0H90.4V100H70.9V66Z'],
+    'A': [84.0, 1.6, 81.1, 'M42.8 17.8 21.2 100H0L31.3 0H44.5ZM59.7 100 38.1 17.8 36.1 0H49.5L81.1 100ZM60.5 62.7V79.4H15.3V62.7Z'],
+    '0': [71.1, 6.5, 58.0, 'M58 41.2V58.6Q58 69.9 55.9 78Q53.8 86.1 49.9 91.2Q46.1 96.4 40.8 98.9Q35.5 101.4 29.1 101.4Q24 101.4 19.6 99.8Q15.1 98.2 11.5 94.9Q7.9 91.7 5.3 86.6Q2.7 81.6 1.4 74.6Q0 67.6 0 58.6V41.2Q0 29.9 2.1 21.9Q4.3 13.8 8.1 8.7Q12 3.5 17.3 1.1Q22.6 -1.4 29 -1.4Q34.1 -1.4 38.5 0.2Q43 1.7 46.6 5Q50.1 8.2 52.7 13.2Q55.2 18.3 56.6 25.2Q58 32.2 58 41.2ZM38.7 61.2V38.4Q38.7 33.1 38.3 29.1Q37.8 25.1 37 22.4Q36.3 19.6 35.1 17.9Q33.8 16.2 32.3 15.4Q30.8 14.6 29 14.6Q26.8 14.6 25 15.8Q23.2 17.1 21.9 19.9Q20.6 22.7 19.9 27.2Q19.3 31.8 19.3 38.4V61.2Q19.3 66.6 19.7 70.6Q20.2 74.7 21 77.5Q21.9 80.3 23 82.1Q24.2 83.8 25.7 84.6Q27.3 85.4 29.1 85.4Q31.3 85.4 33.1 84.1Q35 82.8 36.2 80Q37.4 77.2 38.1 72.6Q38.7 67.9 38.7 61.2Z'],
+    '1': [71.1, 10.9, 38.3, 'M38.3 -0.2V100H19V23.4L0 30.8V14.7L36.3 -0.2Z'],
+    '2': [71.1, 4.9, 60.5, 'M60.5 84V100H1.6V86.3L28.7 51.9Q32.5 46.6 34.8 42.4Q37 38.3 37.9 35Q38.9 31.8 38.9 28.8Q38.9 24.5 37.8 21.3Q36.8 18 34.8 16.3Q32.7 14.6 29.8 14.6Q26.2 14.6 23.9 16.8Q21.6 19 20.4 22.8Q19.3 26.6 19.3 31.4H0Q0 22.4 3.7 14.9Q7.3 7.4 14 3Q20.8 -1.4 30.1 -1.4Q39.3 -1.4 45.6 2Q51.8 5.4 55 11.8Q58.2 18.1 58.2 27Q58.2 31.9 56.9 36.6Q55.6 41.3 53.2 46Q50.7 50.6 47.2 55.4Q43.7 60.2 39.4 65.4L26.3 84Z'],
+    '3': [71.1, 4.7, 59.5, 'M19.2 41.2H28.5Q32.1 41.2 34.5 39.5Q36.8 37.8 37.9 34.6Q39 31.5 39 27.4Q39 23.6 38 20.8Q36.9 17.9 34.8 16.2Q32.7 14.6 29.5 14.6Q27 14.6 24.8 15.9Q22.7 17.3 21.4 19.8Q20.2 22.3 20.2 25.8H0.9Q0.9 17.6 4.6 11.5Q8.4 5.3 14.7 2Q21.1 -1.4 28.9 -1.4Q37.6 -1.4 44.2 1.8Q50.8 5 54.5 11.4Q58.3 17.7 58.3 27.1Q58.3 31.8 56.5 36.3Q54.7 40.7 51.2 44.3Q47.8 47.9 42.8 49.9Q37.9 52 31.7 52H19.2ZM19.2 56.7V46.2H31.7Q38.7 46.2 43.9 48Q49.2 49.9 52.7 53.3Q56.1 56.7 57.8 61.5Q59.5 66.2 59.5 71.9Q59.5 78.9 57.2 84.4Q54.9 89.9 50.7 93.7Q46.5 97.5 40.9 99.4Q35.4 101.4 28.8 101.4Q23.4 101.4 18.2 99.7Q13 98 8.9 94.4Q4.8 90.8 2.4 85.4Q0 79.9 0 72.6H19.2Q19.2 76.2 20.6 79.2Q21.9 82.1 24.2 83.7Q26.4 85.4 29.3 85.4Q32.7 85.4 35.2 83.7Q37.6 81.9 38.9 78.9Q40.2 75.8 40.2 71.6Q40.2 66.3 38.8 63.1Q37.5 59.8 34.9 58.3Q32.3 56.7 28.5 56.7Z'],
+    '4': [71.1, 4.3, 61.9, 'M61.9 62.3V78.3H0.9L0 65.8L34 0H49.2L33.7 29.3L18.8 62.3ZM53.4 0V100H34.1V0Z'],
+    '5': [71.1, 6.6, 58.4, 'M17.3 54.7 2 50.8 7 0H55.2V16.5H22.8L20.9 38Q22.5 36.9 25.6 35.6Q28.7 34.3 32.6 34.3Q38.8 34.3 43.6 36.5Q48.4 38.8 51.7 43.1Q55 47.5 56.7 53.7Q58.4 59.9 58.4 67.8Q58.4 74.5 56.6 80.6Q54.8 86.6 51.2 91.3Q47.5 95.9 42 98.7Q36.5 101.4 29.1 101.4Q23.5 101.4 18.4 99.4Q13.2 97.5 9.1 93.7Q5 89.9 2.5 84.5Q0 79.1 0 72.2H19.1Q19.4 76.3 20.6 79.2Q21.9 82.2 24.1 83.8Q26.2 85.4 29 85.4Q31.8 85.4 33.8 84Q35.7 82.6 36.9 80Q38.1 77.5 38.6 74.1Q39.1 70.7 39.1 66.7Q39.1 62.8 38.4 59.6Q37.7 56.4 36.3 54Q34.9 51.6 32.6 50.4Q30.3 49.2 27.2 49.2Q23 49.2 20.9 50.9Q18.7 52.7 17.3 54.7Z'],
+    '6': [71.1, 6.9, 59.1, 'M43.4 -1.1H45.9V15.3H45Q38.4 15.3 33.6 17.5Q28.8 19.7 25.6 23.9Q22.4 28.1 20.8 34.1Q19.3 40 19.3 47.4V64.2Q19.3 69.5 20 73.4Q20.7 77.4 22.1 80Q23.5 82.7 25.4 84Q27.3 85.3 29.5 85.3Q31.9 85.3 33.8 83.9Q35.7 82.6 37.1 80.1Q38.5 77.7 39.2 74.4Q40 71.2 40 67.2Q40 63.2 39.2 59.9Q38.4 56.5 37.1 54.1Q35.7 51.7 33.7 50.4Q31.8 49 29.3 49Q25.8 49 23.4 51.1Q20.9 53.2 19.6 56.5Q18.3 59.8 18.1 63.3L12.4 59.2Q12.7 54 14.4 49.4Q16 44.7 19 41Q21.9 37.3 26 35.2Q30.1 33.1 35.3 33.1Q41.3 33.1 45.7 35.8Q50.2 38.4 53.2 43.1Q56.2 47.8 57.7 53.9Q59.1 60.1 59.1 67.1Q59.1 74.3 57.1 80.6Q55 86.8 51.2 91.5Q47.5 96.2 42.1 98.8Q36.7 101.4 30 101.4Q23.1 101.4 17.6 98.5Q12 95.6 8.1 90.3Q4.2 84.9 2.1 77.7Q0 70.4 0 61.6V53.9Q0 41.8 2.8 31.7Q5.7 21.6 11.2 14.3Q16.7 6.9 24.8 2.9Q32.8 -1.1 43.4 -1.1Z'],
+    '7': [71.1, 4.7, 60.4, 'M60.4 0V11L28.8 100H8.5L40.2 16H0V0Z'],
+    '8': [71.1, 6.8, 57.4, 'M57.4 72.5Q57.4 82 53.7 88.5Q50.1 94.9 43.6 98.1Q37.1 101.4 28.8 101.4Q20.6 101.4 14.1 98.1Q7.6 94.9 3.8 88.5Q0 82 0 72.5Q0 66.1 2.1 61Q4.2 56 8.1 52.3Q12 48.6 17.3 46.6Q22.5 44.7 28.7 44.7Q37 44.7 43.5 48.1Q50 51.5 53.7 57.8Q57.4 64 57.4 72.5ZM38.1 71.1Q38.1 66.6 37 63.4Q35.9 60.2 33.7 58.5Q31.6 56.7 28.7 56.7Q25.8 56.7 23.7 58.5Q21.6 60.2 20.4 63.4Q19.3 66.6 19.3 71.1Q19.3 75.6 20.4 78.7Q21.6 81.9 23.7 83.6Q25.9 85.4 28.9 85.4Q31.8 85.4 33.9 83.6Q36 81.9 37.1 78.7Q38.1 75.6 38.1 71.1ZM55.8 26.6Q55.8 34.3 52.3 40.1Q48.9 46 42.8 49.2Q36.7 52.5 28.8 52.5Q20.9 52.5 14.8 49.2Q8.6 46 5.2 40.1Q1.7 34.3 1.7 26.6Q1.7 17.5 5.2 11.3Q8.6 5 14.8 1.8Q20.9 -1.4 28.8 -1.4Q36.7 -1.4 42.8 1.8Q48.9 5 52.3 11.3Q55.8 17.5 55.8 26.6ZM36.5 27.5Q36.5 23.6 35.7 20.7Q34.8 17.8 33.1 16.2Q31.4 14.6 28.8 14.6Q26.3 14.6 24.5 16.1Q22.7 17.7 21.9 20.6Q21 23.5 21 27.5Q21 31.5 21.9 34.4Q22.7 37.4 24.5 39.1Q26.3 40.7 28.8 40.7Q31.5 40.7 33.1 39.1Q34.8 37.4 35.7 34.4Q36.5 31.5 36.5 27.5Z'],
+    '9': [71.1, 6.2, 57.6, 'M12.7 84.4H13.7Q20.3 84.4 25 82.5Q29.7 80.6 32.7 76.8Q35.7 73.1 37 67.6Q38.4 62.2 38.4 55.1V35.8Q38.4 30.4 37.7 26.5Q36.9 22.5 35.6 19.9Q34.2 17.3 32.5 15.9Q30.7 14.6 28.7 14.6Q26.4 14.6 24.6 16.2Q22.8 17.8 21.6 20.5Q20.4 23.2 19.8 26.7Q19.2 30.1 19.2 33.8Q19.2 37.5 19.8 40.9Q20.4 44.3 21.7 46.9Q22.9 49.5 24.8 50.9Q26.8 52.4 29.5 52.4Q31.7 52.4 33.5 51.1Q35.3 49.8 36.8 47.7Q38.2 45.7 38.9 43.1Q39.7 40.5 39.8 37.9L46.1 41.7Q46.1 46.4 44.4 51Q42.7 55.6 39.8 59.4Q36.8 63.2 32.9 65.4Q29 67.6 24.6 67.6Q18.6 67.6 14 65.1Q9.4 62.5 6.3 58Q3.1 53.4 1.6 47.3Q0 41.2 0 34Q0 26.7 2 20.3Q4 13.9 7.8 9Q11.6 4.1 16.9 1.4Q22.3 -1.4 28.9 -1.4Q35.4 -1.4 40.7 1.5Q46 4.3 49.8 9.7Q53.6 15.1 55.6 22.7Q57.6 30.2 57.6 39.4V46.3Q57.6 56.2 55.9 64.6Q54.2 73 50.7 79.7Q47.2 86.4 42 91.2Q36.7 96 29.8 98.5Q22.8 101 14 101H12.7Z']
+  };
+  // tekst -> inline SVG met een viewBox precies om de inkt (breedte) en de hoofdletterhoogte (0..100), dus optisch in het midden van het bolletje
+  function glyphs(str, hEm = 0.72) {
+    str = String(str ?? ''); if (!str) return '';
+    const k = 'gl:' + str + ':' + hEm; if (cache.has(k)) return cache.get(k);
+    let pen = 0, x0 = null, x1 = 0, d = '';
+    for (const ch of str) { const g = GL[ch]; if (!g) continue; const x = pen + g[1];
+      if (x0 === null) x0 = x; x1 = x + g[2]; d += `<path transform="translate(${x.toFixed(1)} 0)" d="${g[3]}"/>`; pen += g[0] - 6; }
+    if (x0 === null) return '';
+    const w = x1 - x0, s = `<svg class="vgl" viewBox="${x0.toFixed(1)} 0 ${w.toFixed(1)} 100" style="width:${(hEm * w / 100).toFixed(3)}em;height:${hEm}em" fill="currentColor" aria-hidden="true" focusable="false">${d}<\/svg>`;
+    cache.set(k, s); return s;
+  }
+  return { flag, shirt, role, globe, glyphs, hasGlyph: (c) => !!GL[c], POSCOL };
 })();
 
 // Inflate/deflate in gewone JS, voor browsers zonder DecompressionStream/CompressionStream (Safari < 16.4, bv. iPad Air 2 met iPadOS 15).
@@ -3154,6 +3185,8 @@ const PITCH_LINES = `<rect x="1" y="1" width="398" height="298" class="pl"/><pat
       <path d="M1 6a5 5 0 0 0 5-5M394 1a5 5 0 0 0 5 5M399 294a5 5 0 0 0-5 5M6 299a5 5 0 0 0-5-5" class="pl"/>`;
 const TS_ZONES = [[0, 8.3, 33.3, 66.6], [8.3, 16.6, 33.3, 66.6], [0, 33.3, 0, 33.3], [16.6, 33.3, 33.3, 66.6], [0, 33.3, 66.6, 100], [33.3, 41.6, 0, 33.3], [33.3, 41.6, 66.6, 100], [33.3, 41.6, 33.3, 66.6],
   [41.6, 58.2, 0, 33.3], [41.6, 58.2, 33.3, 66.6], [41.6, 58.2, 66.6, 100], [58.2, 66.6, 33.3, 66.6], [58.2, 100, 0, 33.3], [58.2, 100, 66.6, 100], [66.6, 80, 33.3, 66.6], [80, 100, 33.3, 66.6]];
+// letters/cijfers in de bolletjes als vector (VEC.glyphs), met de tekst onzichtbaar erbij voor schermlezers; onbekende tekens als gewone tekst
+const glyHTML = (t) => { t = String(t ?? ''); return t && [...t].every((c) => VEC.hasGlyph(c)) ? VEC.glyphs(t) + `<span class="vh">${esc(t)}</span>` : esc(t); };
 const POSL = 'GDMA', roleLine = (r) => (r === 0 ? 0 : r <= 6 ? 1 : r <= 11 ? 2 : 3);
 // pictogrammen achter de naam (0x4589b0), eigen vectorversies; het non-EC-balletje uit GFx zoals bij Club Info
 const TS_IC = {
@@ -3179,7 +3212,7 @@ function tsRow(r, list, i, exp, bar, sel) {
   if (!r) return `<div class="ts-row empty" data-l="${list}" data-i="${i}" role="row">${b}<span class="ts-no"></span><span class="ts-nm"></span><span></span><span></span><span></span>${exp ? '<span></span>'.repeat(10) : ''}</div>`;
   return `<div class="ts-row ${sel ? 'sel' : ''}" data-l="${list}" data-i="${i}" data-p="${r.id}" role="row" ${sel ? 'aria-selected="true"' : ''}>${b}<span class="ts-no num">${esc(r.no)}</span>
     <span class="ts-nm"><span>${esc(r.name)}</span>${r.icons.map(tsIcon).join('')}${r.foreign ? flagHTML(r.nat) : ''}</span>
-    <span class="ts-c"><span class="ci-pos p${r.pos}" title="${['Goalkeeper', 'Defender', 'Midfielder', 'Attacker'][r.pos]}">${POSL[r.pos]}</span></span>
+    <span class="ts-c"><span class="ci-pos p${r.pos}" title="${['Goalkeeper', 'Defender', 'Midfielder', 'Attacker'][r.pos]}">${glyHTML(POSL[r.pos])}</span></span>
     <span class="ts-c" data-rolecell><img class="ci-role" src="${VEC.role(r.role)}" alt="" aria-hidden="true"></span>
     ${rtgHTML(r.rtg, 'ts-n')}${exp ? r.attrs.map((a) => `<span class="ts-n num">${a}</span>`).join('') : ''}</div>`;
 }
@@ -3194,7 +3227,7 @@ function viewTeamSel() {
       ${PITCH_LINES}
       ${TS_ZONES.map(([a, b, c, d]) => `<rect x="${a * 4}" y="${c * 3}" width="${(b - a) * 4}" height="${(d - c) * 3}" class="pz"/>`).join('')}</svg>
     ${D.slots.map((s, k) => { const pos = `left:${((s.x - 100) / 4).toFixed(2)}%;top:${((s.y - 4) / 3).toFixed(2)}%`;
-      return `<span class="ts-dot p${s.pos}" style="${pos}">${s.no || ''}</span>${k === selXi ? `<span class="ts-mk" style="${pos}" aria-hidden="true"></span>` : ''}`; }).join('')}</div>`;
+      return `<span class="ts-dot p${s.pos}" style="${pos}">${glyHTML(s.no || '')}</span>${k === selXi ? `<span class="ts-mk" style="${pos}" aria-hidden="true"></span>` : ''}`; }).join('')}</div>`;
   const btns = `<div class="ts-btns"><button class="fgb tsb green" data-tsb="last" ${D.lastMeeting === -1 ? 'aria-disabled="true"' : ''} title="View last meeting between teams">Last Meeting</button>
     <button class="fgb tsb green" data-tsb="rules" title="Assistance on match rules">Rules</button>
     <button class="fgb tsb red" data-tsb="deleg" ${D.canDelegate ? '' : 'aria-disabled="true"'} aria-pressed="${!!D.delegate}" title="Assistance on team selection">Delegate!</button></div>`;
@@ -3376,7 +3409,7 @@ async function playerDetails(p, order = [p], tab = 'status', onClose = null) {
     const btnHTML = all.map((b) => `<button class="btn pd-btn${b.id >= 0x2ee && b.id <= 0x2f1 ? ' acc' : ''}" data-pb="${b.id}" style="grid-row:${rowsN - Math.floor(b.slot / 5)};grid-column:${b.slot % 5 + 1}" ${b.ready ? '' : 'disabled title="Not yet available"'}>${esc(b.label)}</button>`).join('');
     back.firstChild.innerHTML = `<header class="ci-hd pd-hd">
         <button class="ci-nav" data-pv ${i > 0 ? '' : 'disabled'} aria-label="Previous player">◀</button><button class="ci-nav" data-nx ${i >= 0 && i < order.length - 1 ? '' : 'disabled'} aria-label="Next player">▶</button>
-        <h2><span>${v(D.title)}</span></h2><span class="pd-pos"><span class="ci-pos p${D.pos}">${POSL[D.pos]}</span>${v(D.posText)}</span>
+        <h2><span>${v(D.title)}</span></h2><span class="pd-pos"><span class="ci-pos p${D.pos}">${glyHTML(POSL[D.pos])}</span>${v(D.posText)}</span>
         <div class="ci-tabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" data-tab="${k}" aria-selected="${tab === k}" ${k !== 'status' && D.unknown ? 'disabled' : ''}>${l}</button>`).join('')}</div>
         <button class="ci-nav mf-help" data-help aria-label="Help">?</button></header>
       <div class="ci-body pd-b">${body()}</div>
@@ -3508,7 +3541,7 @@ async function matchDetails(match) {
   const rgb = (c) => `rgb(${c[0]},${c[1]},${c[2]})`;
   const team = (title, rows) => `<section class="md-sec"><h3>${esc(title)}</h3><div class="md-t" role="table"><div class="md-r md-h" role="row"><i></i><span>Name</span><span>Pos</span><span>Role</span><span>Rtg</span></div>
     ${rows.map((r) => `<div class="md-r" role="row"><i class="ts-bar b${roleLine(r.role)}" aria-hidden="true"></i><span class="md-nm"><span>${esc(r.name)}</span>${r.foreign ? flagHTML(r.nat) : ''}</span>
-      <span class="ts-c"><span class="ci-pos p${r.pos}" title="${['Goalkeeper', 'Defender', 'Midfielder', 'Attacker'][r.pos] || ''}">${POSL[r.pos] || ''}</span></span>
+      <span class="ts-c"><span class="ci-pos p${r.pos}" title="${['Goalkeeper', 'Defender', 'Midfielder', 'Attacker'][r.pos] || ''}">${glyHTML(POSL[r.pos] || '')}</span></span>
       <span class="ts-c"><img class="ci-role" src="${VEC.role(r.role)}" alt="" aria-hidden="true"></span>
       <span class="md-rtg num" style="--v:${Math.max(0, Math.min(100, r.rtg))}%" aria-label="Rating ${r.rtg}">${r.rtg}</span></div>`).join('')}</div></section>`;
   const evs = (title, list) => `<section class="md-sec md-ev"><h3>${esc(title)}</h3><div class="md-t" role="table"><div class="md-r md-h" role="row"><span>Min</span><span>Event</span></div>
@@ -3571,7 +3604,7 @@ const ptPct = (x, y) => `left:${((x - 100) / 4).toFixed(2)}%;top:${((y - 4) / 3)
 function viewPitch() {
   const P = S.pt; if (!P || !P.data) return '<div class="ft-wait">Loading…</div>';
   const D = P.data, names = !OPT.pitch || OPT.pitch[0] !== 0;
-  const dots = D.players.map((p) => `<span class="ts-dot p${p.pos} pt-dot" data-k="${p.k}" style="${ptPct(p.x, p.y)}" role="button" aria-label="${esc(p.name)}" aria-pressed="${p.sel}">${p.no}</span>
+  const dots = D.players.map((p) => `<span class="ts-dot p${p.pos} pt-dot" data-k="${p.k}" style="${ptPct(p.x, p.y)}" role="button" aria-label="${esc(p.name)}" aria-pressed="${p.sel}">${glyHTML(p.no)}</span>
     ${names ? `<span class="pt-nm" data-nm="${p.k}" style="${ptPct(p.x, p.y)}">${esc(p.name)}</span>` : ''}${p.sel ? `<span class="ts-mk pt-mk" style="${ptPct(p.x, p.y)}" aria-hidden="true"></span>` : ''}`).join('');
   const pitch = `<div class="ts-pitch pt-pitch" aria-label="Formation"><svg viewBox="0 0 400 300" preserveAspectRatio="none" aria-hidden="true">
       ${PITCH_LINES}
@@ -3993,16 +4026,6 @@ function fitPitch() {
 }
 if (NO_CQ) addEventListener('resize', () => requestAnimationFrame(fitPitch));
 addEventListener('resize', () => requestAnimationFrame(() => { if (S.tab === 'pitch') ptFitNames(); }));
-// letters en cijfers in de positiebolletjes optisch in het midden: elk toestel heeft een ander lettertype (Bahnschrift, DIN, Roboto ...) met andere
-// ascent/descent; meet het midden van de inkt t.o.v. het midden van de regel (line-height 1) en schuif met --capdy (in em)
-(function capFix() {
-  try { const ctx = document.createElement('canvas').getContext('2d'), fam = getComputedStyle(document.documentElement).getPropertyValue('--display').trim();
-    ctx.font = `700 100px ${fam}`; const m = ctx.measureText('GDMA0123456789');
-    if (!(m.fontBoundingBoxAscent > 0) || !(m.actualBoundingBoxAscent > 0)) return;
-    const base = (100 - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2 + m.fontBoundingBoxAscent, mid = base - (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;
-    const dy = Math.max(-0.2, Math.min(0.2, (50 - mid) / 100)); document.documentElement.style.setProperty('--capdy', dy.toFixed(3) + 'em');
-  } catch (e) {}
-})();
 function renderGame() {
   document.documentElement.lang = 'en'; START.busy = false; clearInterval(S.timer);
   if (!S.scr) { S.scr = 'today'; S.tab = 'today'; S.open = 'today'; S.hist = ['today']; S.hpos = 0; }
@@ -4460,7 +4483,7 @@ function setupView(msg) {
 // Club Info (popup 0x4c8c70): tabs General and Players, arrows go to the previous/next club of the list (0x4c9360), OK closes
 // icnPos.bmp als scherpe CSS-cirkel in dezelfde kleuren (VEC.POSCOL), met de positieletter (0x8a)
 function posIcon(line, lb) {
-  return `<span class="ci-pos p${line}" title="${esc(lb.pos[line] || '')}">${esc(lb.posShort[line] || '')}</span>`;
+  return `<span class="ci-pos p${line}" title="${esc(lb.pos[line] || '')}">${glyHTML(lb.posShort[line] || '')}</span>`;
 }
 // Role.bmp als vectorveldje (VEC.role), stip op dezelfde plek
 function roleIcon(role, lb) {
